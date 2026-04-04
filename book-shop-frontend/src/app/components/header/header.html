@@ -1,0 +1,55 @@
+<header class="navbar">
+  <a routerLink="/" class="navbar-brand">📚 BookShop</a>
+
+  <nav class="navbar-menu">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" title="Trang chủ">
+      <i class="pi pi-home"></i>
+      <span>Trang chủ</span>
+    </a>
+
+    <a routerLink="/cart" routerLinkActive="active" class="nav-link nav-link-cart" title="Giỏ hàng">
+      <i class="pi pi-shopping-cart"></i>
+      <span>Giỏ hàng</span>
+      @if (cartService.totalItems() > 0) {
+        <span class="cart-badge">{{ cartService.totalItems() }}</span>
+      }
+    </a>
+
+    @if (authService.currentUser()?.role === 'ADMIN') {
+      <a routerLink="/admin" routerLinkActive="active" class="nav-link" title="Quản trị">
+        <i class="pi pi-cog"></i>
+        <span>Quản trị</span>
+      </a>
+    }
+
+    <!-- Phần Đăng nhập / User Profile -->
+    @if (authService.currentUser(); as user) {
+      <div class="user-menu-wrapper">
+        <div class="user-avatar" tabindex="0">
+          {{ user.name.charAt(0).toUpperCase() }}
+        </div>
+        <div class="user-dropdown">
+          <div class="dropdown-header">
+            <strong>{{ user.name }}</strong>
+            <small>{{ user.email }}</small>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a routerLink="/profile" class="dropdown-item">
+            <i class="pi pi-user"></i> Thông tin tài khoản
+          </a>
+          <a href="javascript:void(0)" (click)="logout()" class="dropdown-item logout-link">
+            <i class="pi pi-sign-out"></i> Đăng xuất
+          </a>
+        </div>
+      </div>
+    } @else {
+      <a href="javascript:void(0)" (click)="openLoginDialog()" class="nav-link login-btn">
+        <i class="pi pi-sign-in"></i>
+        <span>Đăng nhập</span>
+      </a>
+    }
+  </nav>
+
+  <!-- Component Hộp thoại Đăng nhập popup toàn cục -->
+  <app-auth-dialog></app-auth-dialog>
+</header>

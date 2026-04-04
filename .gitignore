@@ -1,0 +1,8 @@
+﻿node_modules/
+.vscode/
+dist/
+.env
+*.log
+.DS_Store
+book-shop-backend/node_modules/
+book-shop-frontend/node_modules/

@@ -1,0 +1,99 @@
+<p-dialog
+  [(visible)]="visible"
+  [modal]="true"
+  [showHeader]="false"
+  [style]="{ width: '420px' }"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="auth-dialog"
+>
+  <div class="auth-container">
+    <!-- Nút Đóng -->
+    <button class="close-btn" (click)="visible = false" title="Đóng">
+      <i class="pi pi-times"></i>
+    </button>
+
+    <!-- Tiêu đề -->
+    <div class="auth-header">
+      <div class="auth-icon">🔒</div>
+      <h2 class="auth-title">{{ isLoginMode ? 'Đăng nhập' : 'Tạo tài khoản' }}</h2>
+      <p class="auth-subtitle">
+        {{ isLoginMode ? 'Chào mừng bạn quay lại với BookShop!' : 'Tham gia cùng chúng tôi ngay hôm nay!' }}
+      </p>
+    </div>
+
+    <!-- Form Đăng nhập -->
+    @if (isLoginMode) {
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+        <div class="form-field">
+          <label>Email</label>
+          <input pInputText formControlName="email" placeholder="Nhập email..." />
+          @if (isInvalid(loginForm, 'email')) {
+            <small class="error-msg">Email không hợp lệ.</small>
+          }
+        </div>
+
+        <div class="form-field">
+          <label>Mật khẩu</label>
+          <p-password formControlName="password" [feedback]="false" [toggleMask]="true" placeholder="Nhập mật khẩu..." styleClass="w-full" inputStyleClass="w-full" />
+          @if (isInvalid(loginForm, 'password')) {
+            <small class="error-msg">Mật khẩu tối thiểu 6 ký tự.</small>
+          }
+        </div>
+
+        <p-button type="submit" label="Đăng nhập" [loading]="isLoading" styleClass="w-full btn-main" />
+      </form>
+    } 
+    <!-- Form Đăng ký -->
+    @else {
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+        <div class="form-field">
+          <label>Họ và tên</label>
+          <input pInputText formControlName="name" placeholder="Nhập họ tên..." />
+          @if (isInvalid(registerForm, 'name')) {
+            <small class="error-msg">Vui lòng nhập họ tên.</small>
+          }
+        </div>
+
+        <div class="form-field">
+          <label>Email</label>
+          <input pInputText formControlName="email" placeholder="Nhập email..." />
+          @if (isInvalid(registerForm, 'email')) {
+            <small class="error-msg">Email không hợp lệ.</small>
+          }
+        </div>
+
+        <div class="form-field">
+          <label>Mật khẩu</label>
+          <p-password formControlName="password" [feedback]="true" [toggleMask]="true" placeholder="Tạo mật khẩu..." styleClass="w-full" inputStyleClass="w-full" />
+          @if (isInvalid(registerForm, 'password')) {
+            <small class="error-msg">Mật khẩu tối thiểu 6 ký tự.</small>
+          }
+        </div>
+
+        <p-button type="submit" label="Đăng ký" [loading]="isLoading" styleClass="w-full btn-main" />
+      </form>
+    }
+
+    <!-- Đường phân cách -->
+    <div class="auth-divider">
+      <span>HOẶC</span>
+    </div>
+
+    <!-- Đăng nhập Google -->
+    <p-button 
+      label="Đăng nhập bằng Google" 
+      icon="pi pi-google" 
+      styleClass="w-full btn-google" 
+      (onClick)="loginWithGoogle()"
+    />
+
+    <!-- Chuyển đổi chế độ -->
+    <div class="auth-footer">
+      <span>{{ isLoginMode ? 'Chưa có tài khoản?' : 'Đã có tài khoản?' }}</span>
+      <a href="javascript:void(0)" (click)="toggleMode()">
+        {{ isLoginMode ? 'Tạo tài khoản ngay' : 'Đăng nhập' }}
+      </a>
+    </div>
+  </div>
+</p-dialog>

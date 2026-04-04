@@ -1,0 +1,182 @@
+// Biến màu sắc mang phong cách mộc mạc, vintage
+$bg-cream: #F9F6F0;
+$primary-green: #135C3D;
+$hover-green: #1A7A50;
+$text-main: #2C3E2D;
+$text-muted: #6B7280;
+$error-red: #D32F2F;
+$card-bg: #FFFFFF;
+
+.profile-page {
+  background-color: $bg-cream;
+  min-height: 80vh;
+  padding: 3rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.profile-container {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1000px;
+  flex-wrap: wrap; // Responsive: tự rớt dòng trên màn hình nhỏ
+}
+
+.profile-card {
+  background-color: $card-bg;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  padding: 2.5rem;
+  border: 1px solid rgba($primary-green, 0.1);
+}
+
+// -- STYLE CỘT TRÁI --
+.info-card {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .avatar-section {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    .avatar-circle {
+      width: 100px;
+      height: 100px;
+      background-color: rgba($primary-green, 0.1);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 1rem;
+      
+      i {
+        font-size: 3rem;
+        color: $primary-green;
+      }
+    }
+
+    h2 {
+      color: $primary-green;
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+    }
+
+    .role-badge {
+      display: inline-block;
+      background-color: $primary-green;
+      color: white;
+      padding: 0.25rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin: 0;
+    }
+  }
+
+  .info-list {
+    width: 100%;
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px dashed rgba($text-muted, 0.3);
+      color: $text-main;
+
+      i {
+        color: $primary-green;
+        font-size: 1.2rem;
+      }
+    }
+  }
+}
+
+// -- STYLE CỘT PHẢI --
+.form-card {
+  flex: 2;
+  min-width: 400px;
+
+  .form-title {
+    color: $primary-green;
+    font-size: 1.6rem;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .form-subtitle {
+    color: $text-muted;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+
+    label {
+      color: $text-main;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    input {
+      padding: 0.8rem 1rem;
+      border: 1px solid #D1D5DB;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      background-color: #FAFAFA;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-green;
+        box-shadow: 0 0 0 3px rgba($primary-green, 0.15);
+        background-color: white;
+      }
+    }
+
+    .error-text {
+      color: $error-red;
+      font-size: 0.85rem;
+      margin-top: 0.4rem;
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 1rem;
+    background-color: $primary-green;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 1rem;
+
+    &:hover:not(:disabled) {
+      background-color: $hover-green;
+    }
+
+    &:disabled {
+      background-color: #9CA3AF;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,211 @@
+<div class="admin-wrapper">
+
+  <!-- ══════════════════════════════════════
+       THANH TIÊU ĐỀ
+  ══════════════════════════════════════ -->
+  <div class="admin-header">
+    <div class="admin-header-left">
+      <div class="admin-icon">⚙️</div>
+      <div>
+        <h1 class="admin-title">Hệ thống quản lý sách</h1>
+        <p class="admin-subtitle">Quản lý toàn bộ danh mục sách trong hệ thống</p>
+      </div>
+    </div>
+    <p-button
+      label="Thêm sách mới"
+      icon="pi pi-plus"
+      (onClick)="onAddNew()"
+      styleClass="btn-add"
+    />
+  </div>
+
+  <!-- ══════════════════════════════════════
+       BẢNG DỮ LIỆU
+  ══════════════════════════════════════ -->
+  <div class="table-card">
+    <p-table
+      [value]="books()"
+      [loading]="loading()"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [tableStyle]="{ 'min-width': '62rem' }"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Hiển thị {first} – {last} / tổng {totalRecords} sách"
+      stripedRows
+    >
+      <!-- Caption -->
+      <ng-template #caption>
+        <div class="table-caption">
+          <span>Tổng cộng: <strong>{{ books().length }}</strong> sách</span>
+        </div>
+      </ng-template>
+
+      <!-- Tiêu đề cột -->
+      <ng-template #header>
+        <tr>
+          <th style="width:60px; text-align:center">ID</th>
+          <th style="width:80px; text-align:center">Ảnh</th>
+          <th pSortableColumn="title">Tên sách <p-sortIcon field="title" /></th>
+          <th pSortableColumn="author" style="width:160px">Tác giả <p-sortIcon field="author" /></th>
+          <th pSortableColumn="price"  style="width:130px">Giá <p-sortIcon field="price" /></th>
+          <th pSortableColumn="category" style="width:140px">Thể loại <p-sortIcon field="category" /></th>
+          <th style="width:120px; text-align:center">Thao tác</th>
+        </tr>
+      </ng-template>
+
+      <!-- Dữ liệu -->
+      <ng-template #body let-book>
+        <tr>
+          <td class="col-id">{{ book.id }}</td>
+
+          <td class="col-img">
+            @if (book.image) {
+              <img [src]="book.image" [alt]="book.title" class="book-thumb" />
+            } @else {
+              <div class="no-img">📖</div>
+            }
+          </td>
+
+          <td class="col-title">
+            <span class="book-name">{{ book.title }}</span>
+            @if (book.description) {
+              <span class="book-desc">{{ book.description | slice:0:55 }}…</span>
+            }
+          </td>
+
+          <td>{{ book.author }}</td>
+
+          <td class="col-price">{{ book.price | currency:'VND':'symbol':'1.0-0' }}</td>
+
+          <td><span class="cat-badge">{{ book.category }}</span></td>
+
+          <!-- Nút thao tác -->
+          <td class="col-actions">
+            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
+              severity="warn" pTooltip="Sửa" tooltipPosition="top"
+              (onClick)="onEdit(book)" />
+            <p-button icon="pi pi-trash" [rounded]="true" [text]="true"
+              severity="danger" pTooltip="Xóa" tooltipPosition="top"
+              (onClick)="onDelete(book)" />
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Không có dữ liệu -->
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="7" class="empty-cell">
+            <div class="empty-box">
+              <span style="font-size:2.5rem">📭</span>
+              <p>Chưa có sách nào trong danh mục.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+
+  <!-- ══════════════════════════════════════
+       MODAL THÊM / SỬA SÁCH
+  ══════════════════════════════════════ -->
+  <p-dialog
+    [(visible)]="dialogVisible"
+    [header]="isEditMode ? 'Cập nhật sách' : 'Thêm sách mới'"
+    [modal]="true"
+    [style]="{ width: '520px' }"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <form [formGroup]="bookForm" class="book-form">
+
+      <!-- Tên sách -->
+      <div class="form-field">
+        <label for="title">Tên sách <span class="required">*</span></label>
+        <input id="title" pInputText formControlName="title"
+               placeholder="Nhập tên sách..."
+               [class.ng-invalid]="isInvalid('title')"
+               [class.ng-dirty]="isInvalid('title')" />
+        @if (isInvalid('title')) {
+          <small class="error-msg">{{ getError('title') }}</small>
+        }
+      </div>
+
+      <!-- Tác giả -->
+      <div class="form-field">
+        <label for="author">Tác giả <span class="required">*</span></label>
+        <input id="author" pInputText formControlName="author"
+               placeholder="Nhập tên tác giả..."
+               [class.ng-invalid]="isInvalid('author')"
+               [class.ng-dirty]="isInvalid('author')" />
+        @if (isInvalid('author')) {
+          <small class="error-msg">{{ getError('author') }}</small>
+        }
+      </div>
+
+      <!-- Giá & Thể loại -->
+      <div class="form-row">
+        <div class="form-field">
+          <label for="price">Giá (VND) <span class="required">*</span></label>
+          <p-inputNumber id="price" formControlName="price"
+                         mode="currency" currency="VND" locale="vi-VN"
+                         [min]="0" [useGrouping]="true"
+                         [class.ng-invalid]="isInvalid('price')"
+                         [class.ng-dirty]="isInvalid('price')" />
+          @if (isInvalid('price')) {
+            <small class="error-msg">{{ getError('price') }}</small>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="category">Thể loại <span class="required">*</span></label>
+          <input id="category" pInputText formControlName="category"
+                 placeholder="Ví dụ: Tâm lý, IT..."
+                 [class.ng-invalid]="isInvalid('category')"
+                 [class.ng-dirty]="isInvalid('category')" />
+          @if (isInvalid('category')) {
+            <small class="error-msg">{{ getError('category') }}</small>
+          }
+        </div>
+      </div>
+
+      <!-- URL Ảnh -->
+      <div class="form-field">
+        <label for="image">URL Hình ảnh</label>
+        <input id="image" pInputText formControlName="image"
+               placeholder="https://..." />
+      </div>
+
+      <!-- Mô tả -->
+      <div class="form-field">
+        <label for="description">Mô tả</label>
+        <textarea id="description" pInputText formControlName="description"
+                  rows="3" placeholder="Mô tả ngắn về cuốn sách..."
+                  class="w-full desc-area"></textarea>
+      </div>
+
+    </form>
+
+    <!-- Chân dialog -->
+    <ng-template #footer>
+      <div class="dialog-footer">
+        <p-button label="Hủy" icon="pi pi-times" severity="secondary"
+                  [text]="true" (onClick)="onCancel()" />
+        <p-button [label]="isEditMode ? 'Cập nhật' : 'Thêm mới'"
+                  icon="pi pi-check" (onClick)="onSave()" />
+      </div>
+    </ng-template>
+  </p-dialog>
+
+
+  <!-- ══════════════════════════════════════
+       HỘP THOẠI HỖ TRỢ
+  ══════════════════════════════════════ -->
+  <!-- Hộp thoại xác nhận xóa -->
+  <p-confirmDialog />
+
+  <!-- Thông báo Toast -->
+  <p-toast position="top-right" />
+
+</div>

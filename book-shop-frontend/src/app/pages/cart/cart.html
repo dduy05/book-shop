@@ -1,0 +1,60 @@
+<div class="cart-page">
+  <div class="cart-header">
+    <h1>🛒 Giỏ hàng của bạn</h1>
+    <a routerLink="/" class="btn-back">← Tiếp tục mua sắm</a>
+  </div>
+
+  @if (cartService.cartItems().length === 0) {
+    <div class="cart-empty">
+      <div class="empty-icon">🛒</div>
+      <h2>Giỏ hàng đang trống</h2>
+      <p>Hãy thêm sách vào giỏ hàng để tiếp tục mua sắm nhé!</p>
+      <a routerLink="/" class="btn-shop">Khám phá sách ngay</a>
+    </div>
+  } @else {
+    <div class="cart-content">
+      <div class="cart-items">
+        @for (item of cartService.cartItems(); track item.id) {
+          <div class="cart-item">
+            <div class="item-cover">
+              @if (item.image) {
+                <img [src]="item.image" [alt]="item.title" />
+              } @else {
+                <div class="item-placeholder">📖</div>
+              }
+            </div>
+            <div class="item-info">
+              <h3>{{ item.title }}</h3>
+              <p class="item-author">{{ item.author }}</p>
+              <p class="item-price">Đơn giá: {{ item.price | currency:'VND':'symbol':'1.0-0' }}</p>
+            </div>
+            <div class="item-qty">
+              <span class="qty-label">Số lượng</span>
+              <span class="qty-value">{{ item.quantity }}</span>
+            </div>
+            <div class="item-subtotal">
+              <span class="subtotal-label">Thành tiền</span>
+              <span class="subtotal-value">{{ item.price * item.quantity | currency:'VND':'symbol':'1.0-0' }}</span>
+            </div>
+            <button class="btn-remove" (click)="removeFromCart(item.id)" title="Xóa khỏi giỏ">✕</button>
+          </div>
+        }
+      </div>
+
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Số lượng sách:</span>
+          <span>{{ cartService.totalItems() }} quyển</span>
+        </div>
+        <div class="summary-row total">
+          <span>Tổng thanh toán:</span>
+          <span class="total-price">{{ cartService.totalPrice() | currency:'VND':'symbol':'1.0-0' }}</span>
+        </div>
+        <div class="summary-actions">
+          <button class="btn-clear" (click)="clearCart()">🗑 Xóa tất cả</button>
+          <button class="btn-checkout">✅ Thanh toán</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

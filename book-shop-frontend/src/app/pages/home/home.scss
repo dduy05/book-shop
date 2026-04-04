@@ -1,0 +1,350 @@
+.home-page {
+  min-height: calc(100vh - 64px);
+  background: #f8fafc;
+}
+
+/* ══════════════════════════════════════
+   TAB BAR NGANG
+══════════════════════════════════════ */
+.tab-bar-wrapper {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  position: sticky;
+  top: 64px; /* chiều cao header */
+  z-index: 50;
+}
+
+.tab-bar {
+  display: flex;
+  align-items: stretch;
+  padding: 0 16px;
+  overflow-x: auto;
+  gap: 2px;
+  scrollbar-width: none; /* ẩn scrollbar trên Firefox */
+}
+
+.tab-bar::-webkit-scrollbar { display: none; }
+
+.tab-bar-end { flex: 1; }
+
+/* Mỗi tab */
+.tab-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px 12px 14px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  color: #64748b;
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s, background 0.15s;
+  border-radius: 4px 4px 0 0;
+  user-select: none;
+  position: relative;
+}
+
+.tab-item:hover {
+  color: #6d28d9;
+  background: #f5f3ff;
+}
+
+.tab-active {
+  color: #6d28d9 !important;
+  border-bottom-color: #6d28d9 !important;
+  background: #faf5ff;
+  font-weight: 700;
+}
+
+.tab-icon {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.tab-label { line-height: 1; }
+
+/* Nút X đóng tab */
+.tab-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 2px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tab-close:hover {
+  background: #e0e7ff;
+  color: #6d28d9;
+}
+
+/* ══════════════════════════════════════
+   NỘI DUNG TAB
+══════════════════════════════════════ */
+.tab-content {
+  padding: 28px 28px 80px; /* bottom padding cho floating buttons */
+}
+
+.tab-panel { animation: fadeIn 0.2s ease; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Banner Tổng quan ── */
+.banner-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 60%, #a78bfa 100%);
+  border-radius: 16px;
+  padding: 36px 40px;
+  margin-bottom: 32px;
+  gap: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+.banner-text { flex: 1; color: #fff; }
+
+.banner-tagline {
+  font-size: 1.6rem;
+  margin: 0 0 14px;
+  line-height: 1.3;
+  letter-spacing: 0.3px;
+}
+
+.banner-tagline strong { font-size: 1.9rem; }
+
+.banner-desc {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 24px;
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+.banner-stats {
+  display: flex;
+  gap: 32px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-number {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+}
+
+.banner-mascot {
+  font-size: 7rem;
+  line-height: 1;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.25));
+  flex-shrink: 0;
+}
+
+/* ── Section Title ── */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.section-title h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.section-title i {
+  font-size: 1.2rem;
+  color: #6d28d9;
+}
+
+/* ── Book Grid ── */
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 20px;
+}
+
+.book-item {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.book-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.book-cover {
+  height: 160px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.book-cover img { width: 100%; height: 100%; object-fit: cover; }
+.book-placeholder { font-size: 4rem; }
+
+.book-info { padding: 12px 14px 8px; flex: 1; }
+
+.book-info h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+.author { font-size: 0.82rem; color: #64748b; margin: 0 0 8px; }
+
+.price { font-size: 1rem; font-weight: 700; color: #7c3aed; margin: 0; }
+
+.book-actions { display: flex; gap: 8px; padding: 10px 14px 14px; }
+
+.btn-detail, .btn-cart {
+  flex: 1;
+  padding: 8px 6px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-detail { background: #e0e7ff; color: #3730a3; }
+.btn-detail:hover { background: #c7d2fe; }
+.btn-cart { background: #7c3aed; color: #fff; }
+.btn-cart:hover { background: #6d28d9; }
+
+.loading { color: #94a3b8; font-style: italic; }
+
+/* ── Placeholder tabs ── */
+.tab-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  gap: 12px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.placeholder-icon { font-size: 3.5rem; }
+
+.tab-placeholder h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #475569;
+  margin: 0;
+}
+
+.tab-placeholder p { max-width: 360px; line-height: 1.6; }
+
+/* ── Category grid ── */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 16px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  cursor: pointer;
+  font-weight: 600;
+  color: #374151;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(109,40,217,0.12);
+  background: #faf5ff;
+  color: #6d28d9;
+}
+
+.cat-icon { font-size: 2rem; }
+
+/* ══════════════════════════════════════
+   FLOATING CONTACT BUTTONS
+══════════════════════════════════════ */
+.floating-contacts {
+  position: fixed;
+  right: 20px;
+  bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 200;
+}
+
+.contact-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.contact-btn:hover {
+  transform: translateX(-4px) scale(1.03);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+}
+
+.zalo-btn  { background: #0068ff; color: #fff; }
+.phone-btn { background: #10b981; color: #fff; }
+.search-btn { background: #f59e0b; color: #fff; }
+
+.contact-icon { font-size: 1.1rem; }

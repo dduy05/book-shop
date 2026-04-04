@@ -1,0 +1,69 @@
+<div class="profile-page">
+  <div class="profile-container">
+    
+    <div class="profile-card info-card">
+      <div class="avatar-section">
+        <div class="avatar-circle">
+          <i class="pi pi-user"></i>
+        </div>
+        <h2>{{ authService.currentUser()?.name || 'Khách' }}</h2>
+        <p class="role-badge">{{ authService.currentUser()?.role === 'ADMIN' ? 'Quản trị viên' : 'Thành viên' }}</p>
+      </div>
+
+      <div class="info-list">
+        <div class="info-item">
+          <i class="pi pi-envelope"></i>
+          <span>{{ authService.currentUser()?.email || 'Chưa cập nhật' }}</span>
+        </div>
+        <div class="info-item">
+          <i class="pi pi-calendar"></i>
+          <span>Tham gia: Hôm nay</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-card form-card">
+      <h3 class="form-title">Đổi mật khẩu</h3>
+      <p class="form-subtitle">Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu cho người khác.</p>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()">
+        
+        <div class="form-group">
+          <label>Mật khẩu hiện tại</label>
+          <input type="password" formControlName="oldPassword" placeholder="Nhập mật khẩu hiện tại">
+          @if (passwordForm.get('oldPassword')?.invalid && passwordForm.get('oldPassword')?.touched) {
+            <small class="error-text">Vui lòng nhập mật khẩu hiện tại.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Mật khẩu mới</label>
+          <input type="password" formControlName="newPassword" placeholder="Ít nhất 6 ký tự">
+          @if (passwordForm.get('newPassword')?.hasError('required') && passwordForm.get('newPassword')?.touched) {
+            <small class="error-text">Mật khẩu mới không được để trống.</small>
+          }
+          @if (passwordForm.get('newPassword')?.hasError('minlength') && passwordForm.get('newPassword')?.touched) {
+            <small class="error-text">Mật khẩu phải có ít nhất 6 ký tự.</small>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Xác nhận mật khẩu mới</label>
+          <input type="password" formControlName="confirmPassword" placeholder="Nhập lại mật khẩu mới">
+          @if (passwordForm.get('confirmPassword')?.hasError('required') && passwordForm.get('confirmPassword')?.touched) {
+            <small class="error-text">Vui lòng xác nhận mật khẩu.</small>
+          }
+          @if (passwordForm.get('confirmPassword')?.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched) {
+            <small class="error-text">Mật khẩu xác nhận không khớp!</small>
+          }
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="passwordForm.invalid">
+          Lưu thay đổi
+        </button>
+
+      </form>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,18 @@
+<div class="detail-container">
+  @if (book(); as b) {
+    <div class="book-info">
+      <img [src]="b.image" [alt]="b.title" width="300">
+      
+      <div class="info-text">
+        <h2>{{ b.title }}</h2>
+        <p><strong>Tác giả:</strong> {{ b.author }}</p>
+        <p><strong>Thể loại:</strong> {{ b.category }}</p>
+        <p class="price">{{ b.price | currency:'VND' }}</p> <p class="desc">{{ b.description }}</p>
+        
+        <button (click)="onAddToCart(b)" class="btn-add">Thêm vào giỏ hàng</button>
+      </div>
+    </div>
+  } @else {
+    <p>Đang tải thông tin sách...</p>
+  }
+</div>
