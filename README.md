@@ -66,3 +66,66 @@ package.json             # Danh sách thư viện Node.js
 ├── index.html           # Khung HTML gốc
 ├── main.ts              # Điểm khởi chạy của Angular
 └── styles.scss          # CSS toàn cục (Thiết lập biến màu, typography)
+🚀 Hướng dẫn cài đặt và khởi chạy (Getting Started)
+1. Yêu cầu hệ thống (Prerequisites)
+Node.js (phiên bản 18.x trở lên).
+
+PostgreSQL (phiên bản 14.x trở lên) & pgAdmin 4.
+
+Angular CLI (npm install -g @angular/cli).
+
+2. Cài đặt Cơ sở dữ liệu (Database Setup)
+Mở pgAdmin 4, tạo một database mới tên là book_shop_db.
+
+Chạy đoạn script SQL sau để khởi tạo các bảng:
+
+SQL
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) DEFAULT 'USER',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE books (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255) NOT NULL,
+    category VARCHAR(100),
+    price INT NOT NULL,
+    image TEXT,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+3. Cài đặt và khởi chạy Backend
+Mở Terminal, đi tới thư mục book-shop-backend:
+
+Bash
+# 1. Cài đặt thư viện
+npm install
+
+# 2. Tạo file biến môi trường (.env) ở thư mục gốc backend với nội dung:
+# DB_USER=postgres
+# DB_HOST=localhost
+# DB_DATABASE=book_shop_db
+# DB_PASSWORD=[Mật khẩu pgAdmin của bạn]
+# DB_PORT=5432
+# PORT=3000
+# JWT_SECRET=ChuoiBiMatCuaBan
+
+# 3. Chạy server ở chế độ phát triển
+npm run dev
+Server Backend sẽ chạy tại: http://localhost:3000
+
+4. Cài đặt và khởi chạy Frontend
+Mở một Terminal khác, đi tới thư mục book-shop-frontend:
+
+Bash
+# 1. Cài đặt thư viện
+npm install
+
+# 2. Khởi chạy ứng dụng Angular
+npm start
+Ứng dụng Frontend sẽ chạy tại: http://localhost:4200 (hoặc cổng ngẫu nhiên nếu 4200 bị trùng).
