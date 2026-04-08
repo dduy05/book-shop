@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -20,6 +20,14 @@ export class BookService {
   // Signal lưu danh sách sách (dùng cho các component cần reactive state)
   books = signal<Book[]>([]);
 
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    });
+  }
+
   // ── Lấy tất cả sách và nạp vào signal ──
   loadBooks(): void {
     this.getBooks().subscribe({
@@ -30,30 +38,30 @@ export class BookService {
 
   // ── GET /api/books ──
   getBooks(): Observable<Book[]> {
-    return this.http.get<ApiResponse<Book[]>>(this.apiUrl).pipe(
+    return this.http.get<ApiResponse<Book[]>>(this.apiUrl, { headers: this.getHeaders() }).pipe(
       map(res => res.data)
     );
   }
 
   // ── GET /api/books/:id ──
   getBookById(id: number): Observable<Book> {
-    return this.http.get<ApiResponse<Book>>(`${this.apiUrl}/${id}`).pipe(
+    return this.http.get<ApiResponse<Book>>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() }).pipe(
       map(res => res.data)
     );
   }
 
   // ── POST /api/books ──
   addBook(book: Partial<Book>): Observable<ApiResponse<Book>> {
-    return this.http.post<ApiResponse<Book>>(this.apiUrl, book);
+    return this.http.post<ApiResponse<Book>>(this.apiUrl, book, { headers: this.getHeaders() });
   }
 
   // ── PUT /api/books/:id ──
   updateBook(id: number, book: Partial<Book>): Observable<ApiResponse<Book>> {
-    return this.http.put<ApiResponse<Book>>(`${this.apiUrl}/${id}`, book);
+    return this.http.put<ApiResponse<Book>>(`${this.apiUrl}/${id}`, book, { headers: this.getHeaders() });
   }
 
   // ── DELETE /api/books/:id ──
   deleteBook(id: number): Observable<ApiResponse<null>> {
-    return this.http.delete<ApiResponse<null>>(`${this.apiUrl}/${id}`);
+    return this.http.delete<ApiResponse<null>>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 }

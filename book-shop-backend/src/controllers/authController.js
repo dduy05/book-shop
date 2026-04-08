@@ -20,6 +20,7 @@ const register = async (req, res) => {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Register: password hashed:', hashedPassword);
 
     // Thêm user mới (mặc định role = 'USER')
     const sql = `
@@ -54,13 +55,16 @@ const login = async (req, res) => {
     // Tìm user theo email
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (result.rowCount === 0) {
+      console.log('User not found for email:', email);
       return res.status(400).json({ status: 'error', message: 'Email hoặc mật khẩu không đúng' });
     }
 
     const user = result.rows[0];
+    console.log('User found:', user.email, 'Password hash:', user.password);
 
     // So sánh password với hash
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('Password match:', isMatch, 'Input password:', password);
     if (!isMatch) {
       return res.status(400).json({ status: 'error', message: 'Email hoặc mật khẩu không đúng' });
     }

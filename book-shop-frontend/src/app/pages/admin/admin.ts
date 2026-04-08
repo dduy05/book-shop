@@ -111,19 +111,32 @@ export class AdminComponent implements OnInit {
     const formValue = this.bookForm.value;
 
     if (this.isEditMode && this.editingBookId !== null) {
-      // Cập nhật local (TODO: gọi API PUT)
-      this.books.update(items =>
-        items.map(b => b.id === this.editingBookId ? { ...b, ...formValue } : b)
-      );
-      this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Cập nhật sách thành công!' });
+      // Gọi API PUT để cập nhật
+      this.bookService.updateBook(this.editingBookId, formValue).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Cập nhật sách thành công!' });
+          this.loadBooks(); // Reload danh sách
+          this.dialogVisible = false;
+        },
+        error: (err) => {
+          console.error('Lỗi cập nhật sách:', err);
+          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể cập nhật sách' });
+        }
+      });
     } else {
-      // Thêm mới local (TODO: gọi API POST)
-      const newBook: Book = { id: Date.now(), ...formValue };
-      this.books.update(items => [...items, newBook]);
-      this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Thêm sách mới thành công!' });
+      // Gọi API POST để thêm mới
+      this.bookService.addBook(formValue).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Thêm sách mới thành công!' });
+          this.loadBooks(); // Reload danh sách
+          this.dialogVisible = false;
+        },
+        error: (err) => {
+          console.error('Lỗi thêm sách:', err);
+          this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể thêm sách mới' });
+        }
+      });
     }
-
-    this.dialogVisible = false;
   }
 
   // ── Xóa với ConfirmDialog ──
@@ -136,9 +149,17 @@ export class AdminComponent implements OnInit {
       rejectLabel: 'Hủy',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        // TODO: gọi API DELETE
-        this.books.update(items => items.filter(b => b.id !== book.id));
-        this.messageService.add({ severity: 'warn', summary: 'Đã xóa', detail: `Đã xóa sách "${book.title}"` });
+        // Gọi API DELETE
+        this.bookService.deleteBook(book.id).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'warn', summary: 'Đã xóa', detail: `Đã xóa sách "${book.title}"` });
+            this.loadBooks(); // Reload danh sách
+          },
+          error: (err) => {
+            console.error('Lỗi xóa sách:', err);
+            this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể xóa sách' });
+          }
+        });
       }
     });
   }
