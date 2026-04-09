@@ -6,7 +6,7 @@
       <div class="info-text">
         <h2>{{ b.title }}</h2>
         <p><strong>Tác giả:</strong> {{ b.author }}</p>
-        <p><strong>Thể loại:</strong> {{ b.category }}</p>
+        <p><strong>Thể loại:</strong> {{ b.category_name || 'Chưa phân loại' }}</p>
         <p class="price">{{ b.price | currency:'VND' }}</p> <p class="desc">{{ b.description }}</p>
         
         <button (click)="onAddToCart(b)" class="btn-add">Thêm vào giỏ hàng</button>

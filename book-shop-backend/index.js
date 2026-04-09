@@ -5,6 +5,7 @@ const cors    = require('cors');
 const db      = require('./src/config/db'); // Trigger kiểm tra kết nối DB khi khởi động
 const bookRoutes = require('./src/routes/bookRoutes');
 const authRoutes = require('./src/routes/authRoutes');
+const categoryRoutes = require('./src/routes/categoryRoutes');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +28,9 @@ app.use('/api/auth', authRoutes);
 
 // Routes sách
 app.use('/api/books', bookRoutes);
+
+// Routes categories
+app.use('/api/categories', categoryRoutes);
 
 // ── 404 Handler ─────────────────────────────────────────
 app.use((req, res) => {

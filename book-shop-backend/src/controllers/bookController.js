@@ -3,7 +3,12 @@ const pool = require('../config/db');
 // GET /api/books — Lấy toàn bộ danh sách sách
 const getAllBooks = async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM books ORDER BY id DESC');
+    const result = await pool.query(`
+      SELECT b.*, c.name as category_name
+      FROM books b
+      LEFT JOIN categories c ON b.category_id = c.id
+      ORDER BY b.id DESC
+    `);
     res.json({
       status: 'success',
       data: result.rows,
@@ -19,7 +24,12 @@ const getAllBooks = async (req, res) => {
 const getBookById = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM books WHERE id = $1', [id]);
+    const result = await pool.query(`
+      SELECT b.*, c.name as category_name
+      FROM books b
+      LEFT JOIN categories c ON b.category_id = c.id
+      WHERE b.id = $1
+    `, [id]);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ status: 'error', message: `Không tìm thấy sách với id = ${id}` });
@@ -35,7 +45,7 @@ const getBookById = async (req, res) => {
 // POST /api/books — Thêm sách mới
 const createBook = async (req, res) => {
   try {
-    const { title, author, category, price, image, description } = req.body;
+    const { title, author, category_id, price, image, description } = req.body;
 
     if (!title || !author || !price) {
       return res.status(400).json({
@@ -45,11 +55,11 @@ const createBook = async (req, res) => {
     }
 
     const sql = `
-      INSERT INTO books (title, author, category, price, image, description)
+      INSERT INTO books (title, author, category_id, price, image, description)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
     `;
-    const result = await pool.query(sql, [title, author, category, price, image, description]);
+    const result = await pool.query(sql, [title, author, category_id, price, image, description]);
 
     res.status(201).json({ status: 'success', data: result.rows[0] });
   } catch (err) {
@@ -62,15 +72,15 @@ const createBook = async (req, res) => {
 const updateBook = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, author, category, price, image, description } = req.body;
+    const { title, author, category_id, price, image, description } = req.body;
 
     const sql = `
       UPDATE books
-      SET title = $1, author = $2, category = $3, price = $4, image = $5, description = $6
+      SET title = $1, author = $2, category_id = $3, price = $4, image = $5, description = $6
       WHERE id = $7
       RETURNING *
     `;
-    const result = await pool.query(sql, [title, author, category, price, image, description, id]);
+    const result = await pool.query(sql, [title, author, category_id, price, image, description, id]);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ status: 'error', message: `Không tìm thấy sách với id = ${id}` });

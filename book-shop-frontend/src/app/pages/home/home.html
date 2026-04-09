@@ -31,6 +31,21 @@
   </div>
 
   <!-- ══════════════════════════════════════
+       FILTER THEO THỂ LOẠI
+  ══════════════════════════════════════ -->
+  <div class="filter-section">
+    <div class="filter-group">
+      <label for="category-filter">Lọc theo thể loại:</label>
+      <select id="category-filter" (change)="selectCategory($event)">
+        <option value="">Tất cả thể loại</option>
+        @for (category of categories(); track category.id) {
+          <option [value]="category.id">{{ category.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
        NỘI DUNG CÁC TAB
   ══════════════════════════════════════ -->
   <div class="tab-content">
@@ -72,7 +87,7 @@
           <h2>Tất cả sách</h2>
         </div>
         <div class="book-grid">
-          @for (book of books(); track book.id) {
+          @for (book of getFilteredBooks(); track book.id) {
             <div class="book-item">
               <div class="book-cover">
                 @if (book.image) {

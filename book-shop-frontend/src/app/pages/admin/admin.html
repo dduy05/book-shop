@@ -49,7 +49,7 @@
           <th pSortableColumn="title">Tên sách <p-sortIcon field="title" /></th>
           <th pSortableColumn="author" style="width:160px">Tác giả <p-sortIcon field="author" /></th>
           <th pSortableColumn="price"  style="width:130px">Giá <p-sortIcon field="price" /></th>
-          <th pSortableColumn="category" style="width:140px">Thể loại <p-sortIcon field="category" /></th>
+          <th pSortableColumn="category_name" style="width:140px">Thể loại <p-sortIcon field="category_name" /></th>
           <th style="width:120px; text-align:center">Thao tác</th>
         </tr>
       </ng-template>
@@ -78,7 +78,7 @@
 
           <td class="col-price">{{ book.price | currency:'VND':'symbol':'1.0-0' }}</td>
 
-          <td><span class="cat-badge">{{ book.category }}</span></td>
+          <td><span class="cat-badge">{{ book.category_name }}</span></td>
 
           <!-- Nút thao tác -->
           <td class="col-actions">
@@ -99,6 +99,86 @@
             <div class="empty-box">
               <span style="font-size:2.5rem">📭</span>
               <p>Chưa có sách nào trong danh mục.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+
+  <!-- ══════════════════════════════════════
+       QUẢN LÝ THỂ LOẠI
+  ══════════════════════════════════════ -->
+  <div class="admin-header" style="margin-top: 2rem;">
+    <div class="admin-header-left">
+      <div class="admin-icon">📂</div>
+      <div>
+        <h2 class="admin-title" style="font-size: 1.5rem;">Quản lý thể loại</h2>
+        <p class="admin-subtitle">Thêm, sửa, xóa các thể loại sách</p>
+      </div>
+    </div>
+    <p-button
+      label="Thêm thể loại"
+      icon="pi pi-plus"
+      severity="info"
+      (onClick)="onAddCategory()"
+      styleClass="btn-add"
+    />
+  </div>
+
+  <div class="table-card">
+    <p-table
+      [value]="categories()"
+      [paginator]="true"
+      [rows]="5"
+      [rowsPerPageOptions]="[5, 10, 20]"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Hiển thị {first} – {last} / tổng {totalRecords} thể loại"
+      stripedRows
+    >
+      <!-- Caption -->
+      <ng-template #caption>
+        <div class="table-caption">
+          <span>Tổng cộng: <strong>{{ categories().length }}</strong> thể loại</span>
+        </div>
+      </ng-template>
+
+      <!-- Tiêu đề cột -->
+      <ng-template #header>
+        <tr>
+          <th style="width:60px; text-align:center">ID</th>
+          <th pSortableColumn="name">Tên thể loại <p-sortIcon field="name" /></th>
+          <th pSortableColumn="description">Mô tả <p-sortIcon field="description" /></th>
+          <th style="width:120px; text-align:center">Thao tác</th>
+        </tr>
+      </ng-template>
+
+      <!-- Dữ liệu -->
+      <ng-template #body let-category>
+        <tr>
+          <td class="col-id">{{ category.id }}</td>
+          <td class="col-title">{{ category.name }}</td>
+          <td>{{ category.description || 'Không có mô tả' }}</td>
+          <td class="col-actions">
+            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
+              severity="warn" pTooltip="Sửa" tooltipPosition="top"
+              (onClick)="onEditCategory(category)" />
+            <p-button icon="pi pi-trash" [rounded]="true" [text]="true"
+              severity="danger" pTooltip="Xóa" tooltipPosition="top"
+              (onClick)="onDeleteCategory(category)" />
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Không có dữ liệu -->
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="4" class="empty-cell">
+            <div class="empty-box">
+              <span style="font-size:2.5rem">📂</span>
+              <p>Chưa có thể loại nào.</p>
             </div>
           </td>
         </tr>
@@ -159,13 +239,17 @@
         </div>
 
         <div class="form-field">
-          <label for="category">Thể loại <span class="required">*</span></label>
-          <input id="category" pInputText formControlName="category"
-                 placeholder="Ví dụ: Tâm lý, IT..."
-                 [class.ng-invalid]="isInvalid('category')"
-                 [class.ng-dirty]="isInvalid('category')" />
-          @if (isInvalid('category')) {
-            <small class="error-msg">{{ getError('category') }}</small>
+          <label for="category_id">Thể loại <span class="required">*</span></label>
+          <select id="category_id" formControlName="category_id"
+                  [class.ng-invalid]="isInvalid('category_id')"
+                  [class.ng-dirty]="isInvalid('category_id')">
+            <option value="">-- Chọn thể loại --</option>
+            @for (cat of categories(); track cat.id) {
+              <option [value]="cat.id">{{ cat.name }}</option>
+            }
+          </select>
+          @if (isInvalid('category_id')) {
+            <small class="error-msg">{{ getError('category_id') }}</small>
           }
         </div>
       </div>
@@ -194,6 +278,53 @@
                   [text]="true" (onClick)="onCancel()" />
         <p-button [label]="isEditMode ? 'Cập nhật' : 'Thêm mới'"
                   icon="pi pi-check" (onClick)="onSave()" />
+      </div>
+    </ng-template>
+  </p-dialog>
+
+
+  <!-- ══════════════════════════════════════
+       MODAL THÊM / SỬA THỂ LOẠI
+  ══════════════════════════════════════ -->
+  <p-dialog
+    [(visible)]="categoryDialogVisible"
+    [header]="isEditCategoryMode ? 'Cập nhật thể loại' : 'Thêm thể loại mới'"
+    [modal]="true"
+    [style]="{ width: '450px' }"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <form [formGroup]="categoryForm" class="category-form">
+
+      <!-- Tên thể loại -->
+      <div class="form-field">
+        <label for="cat-name">Tên thể loại <span class="required">*</span></label>
+        <input id="cat-name" pInputText formControlName="name"
+               placeholder="Nhập tên thể loại..."
+               [class.ng-invalid]="isInvalidCategory('name')"
+               [class.ng-dirty]="isInvalidCategory('name')" />
+        @if (isInvalidCategory('name')) {
+          <small class="error-msg">{{ getCategoryError('name') }}</small>
+        }
+      </div>
+
+      <!-- Mô tả -->
+      <div class="form-field">
+        <label for="cat-desc">Mô tả</label>
+        <textarea id="cat-desc" pInputText formControlName="description"
+                  rows="3" placeholder="Mô tả về thể loại này..."
+                  class="w-full desc-area"></textarea>
+      </div>
+
+    </form>
+
+    <!-- Chân dialog -->
+    <ng-template #footer>
+      <div class="dialog-footer">
+        <p-button label="Hủy" icon="pi pi-times" severity="secondary"
+                  [text]="true" (onClick)="onCancelCategory()" />
+        <p-button [label]="isEditCategoryMode ? 'Cập nhật' : 'Thêm mới'"
+                  icon="pi pi-check" (onClick)="onSaveCategory()" />
       </div>
     </ng-template>
   </p-dialog>
