@@ -93,4 +93,44 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+// ─── POST /api/auth/change-password ──────────────────────────────────────────
+const changePassword = async (req, res) => {
+  try {
+    const { userId, oldPassword, newPassword } = req.body;
+
+    // Validate đầu vào
+    if (!userId || !oldPassword || !newPassword) {
+      return res.status(400).json({ status: 'error', message: 'Vui lòng điền đầy đủ thông tin' });
+    }
+
+    // Tìm user
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ status: 'error', message: 'Người dùng không tồn tại' });
+    }
+
+    const user = result.rows[0];
+
+    // So sánh mật khẩu cũ
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ status: 'error', message: 'Mật khẩu hiện tại không đúng' });
+    }
+
+    // Hash mật khẩu mới
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Cập nhật mật khẩu
+    await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedPassword, userId]);
+
+    res.json({
+      status: 'success',
+      message: 'Đổi mật khẩu thành công'
+    });
+  } catch (err) {
+    console.error('changePassword error:', err.message);
+    res.status(500).json({ status: 'error', message: 'Lỗi server khi đổi mật khẩu' });
+  }
+};
+
+module.exports = { register, login, changePassword };

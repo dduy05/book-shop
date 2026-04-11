@@ -1,20 +1,25 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ToastModule],
+  providers: [MessageService],
   templateUrl: './profile.html',
   styleUrl: './profile.scss'
 })
 export class ProfileComponent implements OnInit {
   authService = inject(AuthService);
   fb = inject(FormBuilder);
+  messageService = inject(MessageService);
 
   passwordForm!: FormGroup;
+  isLoading = false;
 
   ngOnInit(): void {
     // Khởi tạo form với 3 ô nhập liệu
@@ -40,11 +45,43 @@ export class ProfileComponent implements OnInit {
 
   onSubmit() {
     if (this.passwordForm.valid) {
-      console.log('Dữ liệu đổi mật khẩu hợp lệ:', this.passwordForm.value);
-      alert('Giao diện bắt lỗi thành công! Chuẩn bị nối API Backend.');
-      this.passwordForm.reset();
+      const user = this.authService.currentUser();
+      if (!user) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Lỗi',
+          detail: 'Vui lòng đăng nhập lại',
+          life: 3000
+        });
+        return;
+      }
+
+      this.isLoading = true;
+      const { oldPassword, newPassword } = this.passwordForm.value;
+
+      this.authService.changePassword(user.id, oldPassword, newPassword).subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Thành công',
+            detail: 'Đổi mật khẩu thành công',
+            life: 3000
+          });
+          this.passwordForm.reset();
+        },
+        error: (err) => {
+          this.isLoading = false;
+          const errorMsg = err.error?.message || 'Đổi mật khẩu thất bại';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Lỗi',
+            detail: errorMsg,
+            life: 4000
+          });
+        }
+      });
     } else {
-      // Nếu form lỗi mà người dùng cố tình bấm Submit, thì bôi đỏ tất cả các ô
       this.passwordForm.markAllAsTouched();
     }
   }

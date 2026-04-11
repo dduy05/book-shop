@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { register, login } = require('../controllers/authController');
+const { register, login, changePassword } = require('../controllers/authController');
 
 const router = Router();
 
@@ -8,5 +8,8 @@ router.post('/register', register);
 
 // POST /api/auth/login    — Đăng nhập, nhận JWT token
 router.post('/login', login);
+
+// POST /api/auth/change-password — Đổi mật khẩu
+router.post('/change-password', changePassword);
 
 module.exports = router;

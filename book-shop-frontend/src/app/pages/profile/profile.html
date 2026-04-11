@@ -1,3 +1,5 @@
+<p-toast position="top-right" />
+
 <div class="profile-page">
   <div class="profile-container">
     
@@ -58,8 +60,8 @@
           }
         </div>
 
-        <button type="submit" class="btn-submit" [disabled]="passwordForm.invalid">
-          Lưu thay đổi
+        <button type="submit" class="btn-submit" [disabled]="passwordForm.invalid || isLoading">
+          {{ isLoading ? 'Đang xử lý...' : 'Lưu thay đổi' }}
         </button>
 
       </form>

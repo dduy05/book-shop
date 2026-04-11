@@ -74,20 +74,20 @@
             }
           </td>
 
-          <td>{{ book.author }}</td>
+          <td class="col-author">{{ book.author }}</td>
 
           <td class="col-price">{{ book.price | currency:'VND':'symbol':'1.0-0' }}</td>
 
-          <td><span class="cat-badge">{{ book.category_name }}</span></td>
+          <td class="col-category"><span class="cat-badge">{{ book.category_name }}</span></td>
 
           <!-- Nút thao tác -->
           <td class="col-actions">
-            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
+            <p-button icon="pi pi-pencil" [rounded]="true"
               severity="warn" pTooltip="Sửa" tooltipPosition="top"
-              (onClick)="onEdit(book)" />
-            <p-button icon="pi pi-trash" [rounded]="true" [text]="true"
+              (onClick)="onEdit(book)" class="btn-edit" />
+            <p-button icon="pi pi-trash" [rounded]="true"
               severity="danger" pTooltip="Xóa" tooltipPosition="top"
-              (onClick)="onDelete(book)" />
+              (onClick)="onDelete(book)" class="btn-delete" />
           </td>
         </tr>
       </ng-template>
@@ -160,14 +160,14 @@
         <tr>
           <td class="col-id">{{ category.id }}</td>
           <td class="col-title">{{ category.name }}</td>
-          <td>{{ category.description || 'Không có mô tả' }}</td>
+          <td class="col-desc">{{ category.description || 'Không có mô tả' }}</td>
           <td class="col-actions">
-            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true"
+            <p-button icon="pi pi-pencil" [rounded]="true"
               severity="warn" pTooltip="Sửa" tooltipPosition="top"
-              (onClick)="onEditCategory(category)" />
-            <p-button icon="pi pi-trash" [rounded]="true" [text]="true"
+              (onClick)="onEditCategory(category)" class="btn-edit" />
+            <p-button icon="pi pi-trash" [rounded]="true"
               severity="danger" pTooltip="Xóa" tooltipPosition="top"
-              (onClick)="onDeleteCategory(category)" />
+              (onClick)="onDeleteCategory(category)" class="btn-delete" />
           </td>
         </tr>
       </ng-template>

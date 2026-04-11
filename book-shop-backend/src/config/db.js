@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Tạo Pool kết nối dựa vào biến môi trường
+
 const pool = new Pool({
   host:     process.env.DB_HOST,
   port:     Number(process.env.DB_PORT),
@@ -10,13 +10,13 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
-// Kiểm tra kết nối ngay khi khởi động
+
 pool.connect((err, client, release) => {
   if (err) {
     console.error('❌ Kết nối PostgreSQL thất bại:', err.message);
     return;
   }
-  release(); // Trả lại connection về pool
+  release(); 
   console.log('✅ Đã kết nối thành công với PostgreSQL');
 });
 
