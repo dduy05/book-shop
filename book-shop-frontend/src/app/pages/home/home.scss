@@ -167,24 +167,42 @@
   flex-shrink: 0;
 }
 
-/* ── Section Title ── */
-.section-title {
+/* ── Filter Section ── */
+.filter-section {
   display: flex;
+  gap: 20px;
   align-items: center;
-  gap: 10px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
-.section-title h2 {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0;
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.section-title i {
-  font-size: 1.2rem;
-  color: #6d28d9;
+.filter-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.filter-group select,
+.filter-group input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: #6d28d9;
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
 }
 
 /* ── Book Grid ── */

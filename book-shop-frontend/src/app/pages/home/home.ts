@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { BookService } from '../../services/book.service';
 import { CategoryService, Category } from '../../services/category.service';
 import { CartService } from '../../services/cart.service';
@@ -12,7 +13,7 @@ import { Book } from '../../models/book.model';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
@@ -25,6 +26,7 @@ export class HomeComponent implements OnInit {
   books = signal<Book[]>([]);
   categories = signal<Category[]>([]);
   selectedCategoryId = signal<number | null>(null);
+  searchTerm = signal<string>('');
 
   // ── Methods ───────────────────────────────────────────
   ngOnInit(): void {
@@ -75,11 +77,24 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  // Filter books theo category
+  // Filter books theo category và search term
   getFilteredBooks(): Book[] {
     const categoryId = this.selectedCategoryId();
-    if (!categoryId) return this.books();
-    return this.books().filter(book => book.category_id === categoryId);
+    const term = this.searchTerm().toLowerCase().trim();
+    let filtered = this.books();
+
+    if (categoryId) {
+      filtered = filtered.filter(book => book.category_id === categoryId);
+    }
+
+    if (term) {
+      filtered = filtered.filter(book =>
+        book.title.toLowerCase().includes(term) ||
+        book.author.toLowerCase().includes(term)
+      );
+    }
+
+    return filtered;
   }
 
   // Chọn category để filter
