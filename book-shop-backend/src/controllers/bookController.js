@@ -95,6 +95,32 @@ const updateBook = async (req, res) => {
   }
 };
 
+// PATCH /api/books/:id/quantity — Cập nhật tồn kho sách
+const updateBookQuantity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { quantity } = req.body;
+
+    if (quantity === undefined || typeof quantity !== 'number' || quantity < 0) {
+      return res.status(400).json({ status: 'error', message: 'quantity phải là số không âm' });
+    }
+
+    const result = await pool.query(
+      'UPDATE books SET quantity = $1 WHERE id = $2 RETURNING *',
+      [quantity, id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ status: 'error', message: `Không tìm thấy sách với id = ${id}` });
+    }
+
+    res.json({ status: 'success', data: result.rows[0] });
+  } catch (err) {
+    console.error('updateBookQuantity error:', err.message);
+    res.status(500).json({ status: 'error', message: 'Lỗi khi cập nhật tồn kho sách' });
+  }
+};
+
 // DELETE /api/books/:id — Xóa sách theo ID
 const deleteBook = async (req, res) => {
   try {
@@ -115,4 +141,4 @@ const deleteBook = async (req, res) => {
   }
 };
 
-module.exports = { getAllBooks, getBookById, createBook, updateBook, deleteBook };
+module.exports = { getAllBooks, getBookById, createBook, updateBook, updateBookQuantity, deleteBook };

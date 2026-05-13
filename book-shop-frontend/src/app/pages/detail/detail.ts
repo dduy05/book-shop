@@ -64,9 +64,9 @@ export class DetailComponent implements OnInit {
     const available = book?.quantity ?? 0;
 
     if (isNaN(value) || value < 1) {
-      value = 1;
+      value = available > 0 ? 1 : 0;
     }
-    if (available > 0 && value > available) {
+    if (value > available) {
       value = available;
     }
     this.quantity.set(value);
@@ -80,27 +80,36 @@ export class DetailComponent implements OnInit {
 
     const available = book.quantity ?? 0;
     const qty = this.quantity();
+    const cartItem = this.cartService.cartItems().find(i => i.id === book.id);
+    const existingQty = cartItem ? cartItem.quantity : 0;
 
     if (available <= 0) {
       alert('Sách hiện đang hết hàng.');
       return;
     }
 
-    if (qty > available) {
-      alert(`Số lượng trong kho chỉ còn ${available} cuốn.`);
-      this.quantity.set(available);
+    if (existingQty + qty > available) {
+      alert(`Bạn chỉ có thể thêm tối đa ${available - existingQty} cuốn nữa.`);
       return;
     }
 
-    const added = this.cartService.addToCart(book, qty);
-    if (!added) {
-      alert('Không thể thêm vào giỏ hàng do số lượng tồn kho không đủ.');
-      return;
-    }
-
-    this.book.update(current => current ? { ...current, quantity: Math.max((current.quantity ?? 0) - qty, 0) } : current);
-    this.quantity.set(1);
-    console.log(`Đã thêm ${qty} cuốn "${book.title}" vào giỏ hàng`);
+    const newStock = available - qty;
+    this.bookService.updateBookQuantity(book.id, newStock).subscribe({
+      next: () => {
+        const added = this.cartService.addToCart(book, qty);
+        if (!added) {
+          alert('Không thể thêm vào giỏ hàng do số lượng trong kho không đủ.');
+          return;
+        }
+        this.book.update(current => current ? { ...current, quantity: newStock } : current);
+        this.quantity.set(newStock > 0 ? 1 : 0);
+        console.log(`Đã thêm ${qty} cuốn "${book.title}" vào giỏ hàng`);
+      },
+      error: (err) => {
+        console.error('Lỗi cập nhật tồn kho:', err);
+        alert('Không thể cập nhật tồn kho. Vui lòng thử lại sau.');
+      }
+    });
   }
 
   toggleWishlist(book: Book): void {

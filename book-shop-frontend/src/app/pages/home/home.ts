@@ -47,15 +47,32 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    const added = this.cartService.addToCart(book, 1);
-    if (!added) {
+    const available = book.quantity ?? 0;
+    const cartItem = this.cartService.cartItems().find(i => i.id === book.id);
+    const existingQty = cartItem ? cartItem.quantity : 0;
+
+    if (available <= 0 || existingQty + 1 > available) {
       alert('Không thể thêm vào giỏ hàng: số lượng trong kho không đủ.');
       return;
     }
 
-    this.books.update(items => items.map(item =>
-      item.id === book.id ? { ...item, quantity: Math.max((item.quantity ?? 0) - 1, 0) } : item
-    ));
+    const newStock = available - 1;
+    this.bookService.updateBookQuantity(book.id, newStock).subscribe({
+      next: () => {
+        const added = this.cartService.addToCart(book, 1);
+        if (!added) {
+          alert('Không thể thêm vào giỏ hàng: số lượng trong kho không đủ.');
+          return;
+        }
+        this.books.update(items => items.map(item =>
+          item.id === book.id ? { ...item, quantity: newStock } : item
+        ));
+      },
+      error: (err) => {
+        console.error('Lỗi cập nhật tồn kho:', err);
+        alert('Không thể cập nhật tồn kho. Vui lòng thử lại sau.');
+      }
+    });
   }
 
   // Filter books theo category

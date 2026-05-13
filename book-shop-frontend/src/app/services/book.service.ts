@@ -60,6 +60,15 @@ export class BookService {
     return this.http.put<ApiResponse<Book>>(`${this.apiUrl}/${id}`, book, { headers: this.getHeaders() });
   }
 
+  // ── PATCH /api/books/:id/quantity ──
+  updateBookQuantity(id: number, quantity: number): Observable<ApiResponse<Book>> {
+    return this.http.patch<ApiResponse<Book>>(
+      `${this.apiUrl}/${id}/quantity`,
+      { quantity },
+      { headers: this.getHeaders() }
+    );
+  }
+
   // ── DELETE /api/books/:id ──
   deleteBook(id: number): Observable<ApiResponse<null>> {
     return this.http.delete<ApiResponse<null>>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });

@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { WishlistService } from '../../services/wishlist.service';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
+import { BookService } from '../../services/book.service';
 import { Book } from '../../models/book.model';
 
 @Component({
@@ -16,6 +17,7 @@ import { Book } from '../../models/book.model';
 export class WishlistComponent implements OnInit {
   protected wishlistService = inject(WishlistService);
   private cartService = inject(CartService);
+  private bookService = inject(BookService);
   protected authService = inject(AuthService);
 
   ngOnInit(): void {
@@ -28,10 +30,28 @@ export class WishlistComponent implements OnInit {
       return;
     }
 
-    const added = this.cartService.addToCart(book, 1);
-    if (!added) {
+    const available = book.quantity ?? 0;
+    const cartItem = this.cartService.cartItems().find(i => i.id === book.id);
+    const existingQty = cartItem ? cartItem.quantity : 0;
+
+    if (available <= 0 || existingQty + 1 > available) {
       alert('Không thể thêm vào giỏ hàng: số lượng trong kho không đủ.');
+      return;
     }
+
+    const newStock = available - 1;
+    this.bookService.updateBookQuantity(book.id, newStock).subscribe({
+      next: () => {
+        const added = this.cartService.addToCart(book, 1);
+        if (!added) {
+          alert('Không thể thêm vào giỏ hàng: số lượng trong kho không đủ.');
+        }
+      },
+      error: (err) => {
+        console.error('Lỗi cập nhật tồn kho:', err);
+        alert('Không thể cập nhật tồn kho. Vui lòng thử lại sau.');
+      }
+    });
   }
 
   removeFromWishlist(bookId: number): void {

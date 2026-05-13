@@ -19,12 +19,17 @@ export class CartService {
 
   addToCart(book: Book, qty = 1): boolean {
     const available = book.quantity ?? 0;
-    if (qty < 1 || qty > available) {
+    if (qty < 1) {
+      return false;
+    }
+
+    const existing = this.cartItems().find(i => i.id === book.id);
+    const currentQty = existing ? existing.quantity : 0;
+    if (currentQty + qty > available) {
       return false;
     }
 
     this.cartItems.update(items => {
-      const existing = items.find(i => i.id === book.id);
       if (existing) {
         return items.map(i =>
           i.id === book.id ? { ...i, quantity: i.quantity + qty } : i

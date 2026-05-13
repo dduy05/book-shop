@@ -4,6 +4,7 @@ const {
   getBookById,
   createBook,
   updateBook,
+  updateBookQuantity,
   deleteBook,
 } = require('../controllers/bookController');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
@@ -17,6 +18,8 @@ router.get('/:id', getBookById);
 router.post('/', verifyToken, isAdmin, createBook);
 
 router.put('/:id', verifyToken, isAdmin, updateBook);
+
+router.patch('/:id/quantity', verifyToken, updateBookQuantity);
 
 router.delete('/:id', verifyToken, isAdmin, deleteBook);
 
