@@ -7,186 +7,414 @@
     <div class="admin-header-left">
       <div class="admin-icon">⚙️</div>
       <div>
-        <h1 class="admin-title">Hệ thống quản lý sách</h1>
-        <p class="admin-subtitle">Quản lý toàn bộ danh mục sách trong hệ thống</p>
+        <h1 class="admin-title">Hệ thống quản trị</h1>
+        <p class="admin-subtitle">Quản lý sách, người dùng và đơn hàng</p>
       </div>
     </div>
-    <p-button
-      label="Thêm sách mới"
-      icon="pi pi-plus"
-      (onClick)="onAddNew()"
-      styleClass="btn-add"
-    />
   </div>
 
   <!-- ══════════════════════════════════════
-       BẢNG DỮ LIỆU
+       TABS QUẢN LÝ
   ══════════════════════════════════════ -->
-  <div class="table-card">
-    <p-table
-      [value]="books()"
-      [loading]="loading()"
-      [paginator]="true"
-      [rows]="5"
-      [rowsPerPageOptions]="[5, 10, 20]"
-      [tableStyle]="{ 'min-width': '62rem' }"
-      [showCurrentPageReport]="true"
-      currentPageReportTemplate="Hiển thị {first} – {last} / tổng {totalRecords} sách"
-      stripedRows
-    >
-      <!-- Caption -->
-      <ng-template #caption>
-        <div class="table-caption">
-          <span>Tổng cộng: <strong>{{ books().length }}</strong> sách</span>
-        </div>
-      </ng-template>
-
-      <!-- Tiêu đề cột -->
-      <ng-template #header>
-        <tr>
-          <th style="width:60px; text-align:center">ID</th>
-          <th style="width:80px; text-align:center">Ảnh</th>
-          <th pSortableColumn="title">Tên sách <p-sortIcon field="title" /></th>
-          <th pSortableColumn="author" style="width:160px">Tác giả <p-sortIcon field="author" /></th>
-          <th pSortableColumn="price"  style="width:120px">Giá <p-sortIcon field="price" /></th>
-          <th style="width:100px; text-align:center">Tồn kho</th>
-          <th pSortableColumn="category_name" style="width:140px">Thể loại <p-sortIcon field="category_name" /></th>
-          <th style="width:120px; text-align:center">Thao tác</th>
-        </tr>
-      </ng-template>
-
-      <!-- Dữ liệu -->
-      <ng-template #body let-book>
-        <tr>
-          <td class="col-id">{{ book.id }}</td>
-
-          <td class="col-img">
-            @if (book.image) {
-              <img [src]="book.image" [alt]="book.title" class="book-thumb" />
-            } @else {
-              <div class="no-img">📖</div>
-            }
-          </td>
-
-          <td class="col-title">
-            <span class="book-name">{{ book.title }}</span>
-            @if (book.description) {
-              <span class="book-desc">{{ book.description | slice:0:55 }}…</span>
-            }
-          </td>
-
-          <td class="col-author">{{ book.author }}</td>
-
-          <td class="col-price">{{ book.price | currency:'VND':'symbol':'1.0-0' }}</td>
-          <td class="col-quantity" style="text-align:center">{{ book.quantity ?? 0 }}</td>
-          <td class="col-category"><span class="cat-badge">{{ book.category_name }}</span></td>
-
-          <!-- Nút thao tác -->
-          <td class="col-actions">
-            <p-button icon="pi pi-pencil" [rounded]="true"
-              severity="warn" pTooltip="Sửa" tooltipPosition="top"
-              (onClick)="onEdit(book)" class="btn-edit" />
-            <p-button icon="pi pi-trash" [rounded]="true"
-              severity="danger" pTooltip="Xóa" tooltipPosition="top"
-              (onClick)="onDelete(book)" class="btn-delete" />
-          </td>
-        </tr>
-      </ng-template>
-
-      <!-- Không có dữ liệu -->
-      <ng-template #emptymessage>
-        <tr>
-          <td colspan="8" class="empty-cell">
-            <div class="empty-box">
-              <span style="font-size:2.5rem">📭</span>
-              <p>Chưa có sách nào trong danh mục.</p>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
+  <div class="admin-tabs">
+    <button type="button" class="tab-button" [class.active]="activeTab==='books'" (click)="setActiveTab('books')">📚 Quản lý sách</button>
+    <button type="button" class="tab-button" [class.active]="activeTab==='users'" (click)="setActiveTab('users')">👥 Quản lý người dùng</button>
+    <button type="button" class="tab-button" [class.active]="activeTab==='orders'" (click)="setActiveTab('orders')">📦 Quản lý đơn hàng</button>
   </div>
-
 
   <!-- ══════════════════════════════════════
-       QUẢN LÝ THỂ LOẠI
-  ══════════════════════════════════════ -->
-  <div class="admin-header" style="margin-top: 2rem;">
-    <div class="admin-header-left">
-      <div class="admin-icon">📂</div>
-      <div>
-        <h2 class="admin-title" style="font-size: 1.5rem;">Quản lý thể loại</h2>
-        <p class="admin-subtitle">Thêm, sửa, xóa các thể loại sách</p>
+         TAB QUẢN LÝ SÁCH
+    ══════════════════════════════════════ -->
+  <section *ngIf="activeTab === 'books'" class="tab-content">
+        <div class="tab-header">
+          <p-button
+            label="Thêm sách mới"
+            icon="pi pi-plus"
+            (onClick)="onAddNew()"
+            styleClass="btn-add"
+          />
+        </div>
+
+        <div class="table-card">
+          <p-table
+            [value]="books()"
+            [loading]="loading()"
+            [paginator]="true"
+            [rows]="5"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            [tableStyle]="{ 'min-width': '62rem' }"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Hiển thị {first} – {last} / tổng {totalRecords} sách"
+            stripedRows
+          >
+            <!-- Caption -->
+            <ng-template #caption>
+              <div class="table-caption">
+                <span>Tổng cộng: <strong>{{ books().length }}</strong> sách</span>
+              </div>
+            </ng-template>
+
+            <!-- Tiêu đề cột -->
+            <ng-template #header>
+              <tr>
+                <th style="width:60px; text-align:center">ID</th>
+                <th style="width:80px; text-align:center">Ảnh</th>
+                <th pSortableColumn="title">Tên sách <p-sortIcon field="title" /></th>
+                <th pSortableColumn="author" style="width:160px">Tác giả <p-sortIcon field="author" /></th>
+                <th pSortableColumn="price"  style="width:120px">Giá <p-sortIcon field="price" /></th>
+                <th style="width:100px; text-align:center">Tồn kho</th>
+                <th pSortableColumn="category_name" style="width:140px">Thể loại <p-sortIcon field="category_name" /></th>
+                <th style="width:120px; text-align:center">Thao tác</th>
+              </tr>
+            </ng-template>
+
+            <!-- Dữ liệu -->
+            <ng-template #body let-book>
+              <tr>
+                <td class="col-id">{{ book.id }}</td>
+
+                <td class="col-img">
+                  <img *ngIf="book.image; else noImage" [src]="book.image" [alt]="book.title" class="book-thumb" />
+                  <ng-template #noImage>
+                    <div class="no-img">📖</div>
+                  </ng-template>
+                </td>
+
+                <td class="col-title">
+                  <span class="book-name">{{ book.title }}</span>
+                  <span *ngIf="book.description" class="book-desc">{{ book.description | slice:0:55 }}…</span>
+                </td>
+
+                <td class="col-author">{{ book.author }}</td>
+
+                <td class="col-price">{{ book.price | currency:'VND':'symbol':'1.0-0' }}</td>
+                <td class="col-quantity" style="text-align:center">{{ book.quantity ?? 0 }}</td>
+                <td class="col-category"><span class="cat-badge">{{ book.category_name }}</span></td>
+
+                <!-- Nút thao tác -->
+                <td class="col-actions">
+                  <p-button icon="pi pi-pencil" [rounded]="true"
+                    severity="warn" pTooltip="Sửa" tooltipPosition="top"
+                    (onClick)="onEdit(book)" class="btn-edit" />
+                  <p-button icon="pi pi-trash" [rounded]="true"
+                    severity="danger" pTooltip="Xóa" tooltipPosition="top"
+                    (onClick)="onDelete(book)" class="btn-delete" />
+                </td>
+              </tr>
+            </ng-template>
+
+            <!-- Không có dữ liệu -->
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="8" class="empty-cell">
+                  <div class="empty-box">
+                    <span style="font-size:2.5rem">📭</span>
+                    <p>Chưa có sách nào trong danh mục.</p>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+
+        <!-- Quản lý thể loại -->
+        <div class="admin-header" style="margin-top: 2rem;">
+          <div class="admin-header-left">
+            <div class="admin-icon">📂</div>
+            <div>
+              <h3 class="admin-title" style="font-size: 1.3rem;">Quản lý thể loại</h3>
+              <p class="admin-subtitle">Thêm, sửa, xóa các thể loại sách</p>
+            </div>
+          </div>
+          <p-button
+            label="Thêm thể loại"
+            icon="pi pi-plus"
+            severity="info"
+            (onClick)="onAddCategory()"
+            styleClass="btn-add"
+          />
+        </div>
+
+        <div class="table-card">
+          <p-table
+            [value]="categories()"
+            [paginator]="true"
+            [rows]="5"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            [tableStyle]="{ 'min-width': '50rem' }"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Hiển thị {first} – {last} / tổng {totalRecords} thể loại"
+            stripedRows
+          >
+            <!-- Caption -->
+            <ng-template #caption>
+              <div class="table-caption">
+                <span>Tổng cộng: <strong>{{ categories().length }}</strong> thể loại</span>
+              </div>
+            </ng-template>
+
+            <!-- Tiêu đề cột -->
+            <ng-template #header>
+              <tr>
+                <th style="width:60px; text-align:center">ID</th>
+                <th pSortableColumn="name">Tên thể loại <p-sortIcon field="name" /></th>
+                <th pSortableColumn="description">Mô tả <p-sortIcon field="description" /></th>
+                <th style="width:120px; text-align:center">Thao tác</th>
+              </tr>
+            </ng-template>
+
+            <!-- Dữ liệu -->
+            <ng-template #body let-category>
+              <tr>
+                <td class="col-id">{{ category.id }}</td>
+                <td class="col-title">{{ category.name }}</td>
+                <td class="col-desc">{{ category.description || 'Không có mô tả' }}</td>
+                <td class="col-actions">
+                  <p-button icon="pi pi-pencil" [rounded]="true"
+                    severity="warn" pTooltip="Sửa" tooltipPosition="top"
+                    (onClick)="onEditCategory(category)" class="btn-edit" />
+                  <p-button icon="pi pi-trash" [rounded]="true"
+                    severity="danger" pTooltip="Xóa" tooltipPosition="top"
+                    (onClick)="onDeleteCategory(category)" class="btn-delete" />
+                </td>
+              </tr>
+            </ng-template>
+
+            <!-- Không có dữ liệu -->
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="4" class="empty-cell">
+                  <div class="empty-box">
+                    <span style="font-size:2.5rem">📂</span>
+                    <p>Chưa có thể loại nào.</p>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         TAB QUẢN LÝ NGƯỜI DÙNG
+    ══════════════════════════════════════ -->
+    <section *ngIf="activeTab === 'users'" class="tab-content">
+        <div class="table-card">
+          <p-table
+            [value]="users()"
+            [loading]="loading()"
+            [paginator]="true"
+            [rows]="10"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            [tableStyle]="{ 'min-width': '50rem' }"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Hiển thị {first} – {last} / tổng {totalRecords} người dùng"
+            stripedRows
+          >
+            <!-- Caption -->
+            <ng-template #caption>
+              <div class="table-caption">
+                <span>Tổng cộng: <strong>{{ users().length }}</strong> người dùng</span>
+              </div>
+            </ng-template>
+
+            <!-- Tiêu đề cột -->
+            <ng-template #header>
+              <tr>
+                <th style="width:60px; text-align:center">ID</th>
+                <th pSortableColumn="name">Tên <p-sortIcon field="name" /></th>
+                <th pSortableColumn="email">Email <p-sortIcon field="email" /></th>
+                <th style="width:100px; text-align:center">Role</th>
+                <th pSortableColumn="created_at" style="width:140px">Ngày tạo <p-sortIcon field="created_at" /></th>
+                <th style="width:120px; text-align:center">Thao tác</th>
+              </tr>
+            </ng-template>
+
+            <!-- Dữ liệu -->
+            <ng-template #body let-user>
+              <tr>
+                <td class="col-id">{{ user.id }}</td>
+                <td class="col-title">{{ user.name }}</td>
+                <td class="col-email">{{ user.email }}</td>
+                <td class="col-role">
+                  <p-tag [value]="user.role === 'ADMIN' ? 'Admin' : 'User'"
+                         [severity]="getUserRoleSeverity(user.role)" />
+                </td>
+                <td class="col-date">{{ formatDate(user.created_at) }}</td>
+                <td class="col-actions">
+                  <p-button icon="pi pi-user-edit" [rounded]="true"
+                    severity="info" pTooltip="Đổi role" tooltipPosition="top"
+                    (onClick)="onUpdateUserRole(user)" class="btn-edit" />
+                  <p-button icon="pi pi-trash" [rounded]="true"
+                    severity="danger" pTooltip="Xóa" tooltipPosition="top"
+                    (onClick)="onDeleteUser(user)" class="btn-delete" />
+                </td>
+              </tr>
+            </ng-template>
+
+            <!-- Không có dữ liệu -->
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="6" class="empty-cell">
+                  <div class="empty-box">
+                    <span style="font-size:2.5rem">👥</span>
+                    <p>Chưa có người dùng nào.</p>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         TAB QUẢN LÝ ĐƠN HÀNG
+    ══════════════════════════════════════ -->
+    <section *ngIf="activeTab === 'orders'" class="tab-content">
+        <div class="table-card">
+          <p-table
+            [value]="orders()"
+            [loading]="loading()"
+            [paginator]="true"
+            [rows]="10"
+            [rowsPerPageOptions]="[5, 10, 20]"
+            [tableStyle]="{ 'min-width': '70rem' }"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Hiển thị {first} – {last} / tổng {totalRecords} đơn hàng"
+            stripedRows
+          >
+            <!-- Caption -->
+            <ng-template #caption>
+              <div class="table-caption">
+                <span>Tổng cộng: <strong>{{ orders().length }}</strong> đơn hàng</span>
+              </div>
+            </ng-template>
+
+            <!-- Tiêu đề cột -->
+            <ng-template #header>
+              <tr>
+                <th style="width:60px; text-align:center">ID</th>
+                <th pSortableColumn="user_name">Khách hàng <p-sortIcon field="user_name" /></th>
+                <th pSortableColumn="total_amount" style="width:120px">Tổng tiền <p-sortIcon field="total_amount" /></th>
+                <th style="width:140px; text-align:center">Trạng thái</th>
+                <th pSortableColumn="created_at" style="width:140px">Ngày đặt <p-sortIcon field="created_at" /></th>
+                <th style="width:120px; text-align:center">Thao tác</th>
+              </tr>
+            </ng-template>
+
+            <!-- Dữ liệu -->
+            <ng-template #body let-order>
+              <tr>
+                <td class="col-id">#{{ order.id }}</td>
+                <td class="col-customer">
+                  <div class="customer-info">
+                    <span class="customer-name">{{ order.user_name }}</span>
+                    <span class="customer-email">{{ order.user_email }}</span>
+                  </div>
+                </td>
+                <td class="col-amount">{{ formatCurrency(order.total_amount) }}</td>
+                <td class="col-status">
+                  <ng-container *ngIf="order.status !== 'CANCELLED'; else cancelledLabel">
+                    <select class="order-status-select" [ngModel]="order.status" (ngModelChange)="updateOrderStatus(order, $event)">
+                      <option *ngFor="let opt of orderStatusOptions" [value]="opt.value">{{ opt.label }}</option>
+                    </select>
+                  </ng-container>
+                  <ng-template #cancelledLabel>
+                    <span class="order-status-cancelled">Đã hủy</span>
+                  </ng-template>
+                </td>
+                <td class="col-date">{{ formatDate(order.created_at) }}</td>
+                <td class="col-actions">
+                  <p-button icon="pi pi-eye" [rounded]="true"
+                    severity="info" pTooltip="Xem chi tiết" tooltipPosition="top"
+                    class="btn-view" (onClick)="onViewOrder(order)" />
+                </td>
+              </tr>
+            </ng-template>
+
+            <!-- Không có dữ liệu -->
+            <ng-template #emptymessage>
+              <tr>
+                <td colspan="6" class="empty-cell">
+                  <div class="empty-box">
+                    <span style="font-size:2.5rem">📦</span>
+                    <p>Chưa có đơn hàng nào.</p>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+    </section>
+
+  <p-dialog
+    [(visible)]="orderDetailDialogVisible"
+    [header]="selectedOrder ? 'Chi tiết đơn hàng #' + selectedOrder.id : 'Chi tiết đơn hàng'"
+    [modal]="true"
+    [style]="{ width: '760px' }"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <div *ngIf="selectedOrder; else loadingOrderDetail">
+      <div class="order-detail-grid">
+        <div>
+          <h4>Thông tin khách hàng</h4>
+          <p><strong>Khách hàng:</strong> {{ selectedOrder.user_name }}</p>
+          <p><strong>Email:</strong> {{ selectedOrder.user_email }}</p>
+          <p><strong>Ngày đặt:</strong> {{ formatDate(selectedOrder.created_at) }}</p>
+          <p><strong>Trạng thái:</strong>
+            <span [ngClass]="'order-status-' + selectedOrder.status.toLowerCase()">
+              {{ selectedOrder.status }}
+            </span>
+          </p>
+        </div>
+        <div>
+          <h4>Thông tin thanh toán</h4>
+          <p><strong>Địa chỉ giao:</strong> {{ selectedOrder.shipping_address || 'Chưa có' }}</p>
+          <p><strong>Phương thức:</strong> {{ selectedOrder.payment_method || 'Chưa có' }}</p>
+          <p><strong>Tổng tiền:</strong> {{ formatCurrency(selectedOrder.total_amount) }}</p>
+        </div>
+      </div>
+
+      <div class="order-items-table">
+        <h4>Chi tiết sản phẩm</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Sách</th>
+              <th>Giá</th>
+              <th>Số lượng</th>
+              <th>Tổng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of getOrderItems(selectedOrder)">
+              <td>
+                <div class="order-item-name">{{ item.book_title }}</div>
+                <div class="order-item-meta">{{ item.book_author }}</div>
+              </td>
+              <td>{{ formatCurrency(item.price) }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ formatCurrency(item.price * item.quantity) }}</td>
+            </tr>
+            <tr *ngIf="getOrderItems(selectedOrder).length === 0">
+              <td colspan="4" class="empty-cell">Không có sản phẩm trong đơn hàng.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <p-button
-      label="Thêm thể loại"
-      icon="pi pi-plus"
-      severity="info"
-      (onClick)="onAddCategory()"
-      styleClass="btn-add"
-    />
-  </div>
 
-  <div class="table-card">
-    <p-table
-      [value]="categories()"
-      [paginator]="true"
-      [rows]="5"
-      [rowsPerPageOptions]="[5, 10, 20]"
-      [tableStyle]="{ 'min-width': '50rem' }"
-      [showCurrentPageReport]="true"
-      currentPageReportTemplate="Hiển thị {first} – {last} / tổng {totalRecords} thể loại"
-      stripedRows
-    >
-      <!-- Caption -->
-      <ng-template #caption>
-        <div class="table-caption">
-          <span>Tổng cộng: <strong>{{ categories().length }}</strong> thể loại</span>
-        </div>
-      </ng-template>
+    <ng-template #loadingOrderDetail>
+      <div class="loading-order-detail">Đang tải chi tiết đơn hàng...</div>
+    </ng-template>
 
-      <!-- Tiêu đề cột -->
-      <ng-template #header>
-        <tr>
-          <th style="width:60px; text-align:center">ID</th>
-          <th pSortableColumn="name">Tên thể loại <p-sortIcon field="name" /></th>
-          <th pSortableColumn="description">Mô tả <p-sortIcon field="description" /></th>
-          <th style="width:120px; text-align:center">Thao tác</th>
-        </tr>
-      </ng-template>
-
-      <!-- Dữ liệu -->
-      <ng-template #body let-category>
-        <tr>
-          <td class="col-id">{{ category.id }}</td>
-          <td class="col-title">{{ category.name }}</td>
-          <td class="col-desc">{{ category.description || 'Không có mô tả' }}</td>
-          <td class="col-actions">
-            <p-button icon="pi pi-pencil" [rounded]="true"
-              severity="warn" pTooltip="Sửa" tooltipPosition="top"
-              (onClick)="onEditCategory(category)" class="btn-edit" />
-            <p-button icon="pi pi-trash" [rounded]="true"
-              severity="danger" pTooltip="Xóa" tooltipPosition="top"
-              (onClick)="onDeleteCategory(category)" class="btn-delete" />
-          </td>
-        </tr>
-      </ng-template>
-
-      <!-- Không có dữ liệu -->
-      <ng-template #emptymessage>
-        <tr>
-          <td colspan="4" class="empty-cell">
-            <div class="empty-box">
-              <span style="font-size:2.5rem">📂</span>
-              <p>Chưa có thể loại nào.</p>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </div>
-
+    <ng-template #footer>
+      <div class="dialog-footer">
+        <p-button label="Đóng" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="orderDetailDialogVisible = false" />
+      </div>
+    </ng-template>
+  </p-dialog>
 
   <!-- ══════════════════════════════════════
        MODAL THÊM / SỬA SÁCH
@@ -208,9 +436,7 @@
                placeholder="Nhập tên sách..."
                [class.ng-invalid]="isInvalid('title')"
                [class.ng-dirty]="isInvalid('title')" />
-        @if (isInvalid('title')) {
-          <small class="error-msg">{{ getError('title') }}</small>
-        }
+        <small *ngIf="isInvalid('title')" class="error-msg">{{ getError('title') }}</small>
       </div>
 
       <!-- Tác giả -->
@@ -220,9 +446,7 @@
                placeholder="Nhập tên tác giả..."
                [class.ng-invalid]="isInvalid('author')"
                [class.ng-dirty]="isInvalid('author')" />
-        @if (isInvalid('author')) {
-          <small class="error-msg">{{ getError('author') }}</small>
-        }
+        <small *ngIf="isInvalid('author')" class="error-msg">{{ getError('author') }}</small>
       </div>
 
       <!-- Giá -->
@@ -234,9 +458,7 @@
                          [min]="0" [useGrouping]="true"
                          [class.ng-invalid]="isInvalid('price')"
                          [class.ng-dirty]="isInvalid('price')" />
-          @if (isInvalid('price')) {
-            <small class="error-msg">{{ getError('price') }}</small>
-          }
+          <small *ngIf="isInvalid('price')" class="error-msg">{{ getError('price') }}</small>
         </div>
 
         <div class="form-field">
@@ -245,9 +467,7 @@
                          [min]="0" [useGrouping]="true"
                          [class.ng-invalid]="isInvalid('quantity')"
                          [class.ng-dirty]="isInvalid('quantity')" />
-          @if (isInvalid('quantity')) {
-            <small class="error-msg">{{ getError('quantity') }}</small>
-          }
+          <small *ngIf="isInvalid('quantity')" class="error-msg">{{ getError('quantity') }}</small>
         </div>
       </div>
 
@@ -258,13 +478,9 @@
                 [class.ng-invalid]="isInvalid('category_id')"
                 [class.ng-dirty]="isInvalid('category_id')">
           <option value="">-- Chọn thể loại --</option>
-          @for (cat of categories(); track cat.id) {
-            <option [value]="cat.id">{{ cat.name }}</option>
-          }
+          <option *ngFor="let cat of categories()" [value]="cat.id">{{ cat.name }}</option>
         </select>
-        @if (isInvalid('category_id')) {
-          <small class="error-msg">{{ getError('category_id') }}</small>
-        }
+        <small *ngIf="isInvalid('category_id')" class="error-msg">{{ getError('category_id') }}</small>
       </div>
 
       <!-- URL Ảnh -->
@@ -316,9 +532,7 @@
                placeholder="Nhập tên thể loại..."
                [class.ng-invalid]="isInvalidCategory('name')"
                [class.ng-dirty]="isInvalidCategory('name')" />
-        @if (isInvalidCategory('name')) {
-          <small class="error-msg">{{ getCategoryError('name') }}</small>
-        }
+        <small *ngIf="isInvalidCategory('name')" class="error-msg">{{ getCategoryError('name') }}</small>
       </div>
 
       <!-- Mô tả -->
@@ -351,5 +565,4 @@
 
   <!-- Thông báo Toast -->
   <p-toast position="top-right" />
-
 </div>

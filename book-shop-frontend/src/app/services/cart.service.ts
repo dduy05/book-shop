@@ -41,11 +41,18 @@ export class CartService {
     return true;
   }
 
-  removeFromCart(bookId: number): void {
-    this.cartItems.update(items => items.filter(i => i.id !== bookId));
+  removeFromCart(bookId: number): CartItem | null {
+    const itemToRemove = this.cartItems().find(i => i.id === bookId);
+    if (itemToRemove) {
+      this.cartItems.update(items => items.filter(i => i.id !== bookId));
+      return itemToRemove;
+    }
+    return null;
   }
 
-  clearCart(): void {
+  clearCart(): CartItem[] {
+    const items = this.cartItems();
     this.cartItems.set([]);
+    return items;
   }
 }

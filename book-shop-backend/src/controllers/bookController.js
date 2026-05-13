@@ -95,19 +95,35 @@ const updateBook = async (req, res) => {
   }
 };
 
-// PATCH /api/books/:id/quantity — Cập nhật tồn kho sách
+// PATCH /api/books/:id/quantity — Cập nhật tồn kho sách (có thể tăng hoặc giảm)
 const updateBookQuantity = async (req, res) => {
   try {
     const { id } = req.params;
-    const { quantity } = req.body;
+    const { quantity, delta } = req.body;
 
-    if (quantity === undefined || typeof quantity !== 'number' || quantity < 0) {
-      return res.status(400).json({ status: 'error', message: 'quantity phải là số không âm' });
+    let newQuantity;
+
+    if (delta !== undefined && typeof delta === 'number') {
+      // Nếu có delta, lấy quantity hiện tại và cộng delta
+      const currentResult = await pool.query('SELECT quantity FROM books WHERE id = $1', [id]);
+      if (currentResult.rowCount === 0) {
+        return res.status(404).json({ status: 'error', message: `Không tìm thấy sách với id = ${id}` });
+      }
+      newQuantity = currentResult.rows[0].quantity + delta;
+    } else if (quantity !== undefined && typeof quantity === 'number' && quantity >= 0) {
+      // Nếu có quantity tuyệt đối
+      newQuantity = quantity;
+    } else {
+      return res.status(400).json({ status: 'error', message: 'Cần cung cấp quantity (tuyệt đối) hoặc delta (tương đối)' });
+    }
+
+    if (newQuantity < 0) {
+      return res.status(400).json({ status: 'error', message: 'Số lượng không thể âm' });
     }
 
     const result = await pool.query(
       'UPDATE books SET quantity = $1 WHERE id = $2 RETURNING *',
-      [quantity, id]
+      [newQuantity, id]
     );
 
     if (result.rowCount === 0) {

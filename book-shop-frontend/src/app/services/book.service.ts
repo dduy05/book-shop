@@ -61,10 +61,13 @@ export class BookService {
   }
 
   // ── PATCH /api/books/:id/quantity ──
-  updateBookQuantity(id: number, quantity: number): Observable<ApiResponse<Book>> {
+  updateBookQuantity(id: number, quantity: number): Observable<ApiResponse<Book>>;
+  updateBookQuantity(id: number, quantity: number, delta: boolean): Observable<ApiResponse<Book>>;
+  updateBookQuantity(id: number, quantityOrDelta: number, delta = false): Observable<ApiResponse<Book>> {
+    const body = delta ? { delta: quantityOrDelta } : { quantity: quantityOrDelta };
     return this.http.patch<ApiResponse<Book>>(
       `${this.apiUrl}/${id}/quantity`,
-      { quantity },
+      body,
       { headers: this.getHeaders() }
     );
   }

@@ -1,4 +1,6 @@
 <div class="cart-page">
+  <p-toast position="top-right" />
+
   <div class="cart-header">
     <h1>🛒 Giỏ hàng của bạn</h1>
     <a routerLink="/" class="btn-back">← Tiếp tục mua sắm</a>
@@ -52,9 +54,75 @@
         </div>
         <div class="summary-actions">
           <button class="btn-clear" (click)="clearCart()">🗑 Xóa tất cả</button>
-          <button class="btn-checkout">✅ Thanh toán</button>
+          <button class="btn-checkout" (click)="openCheckoutDialog()">✅ Thanh toán</button>
         </div>
       </div>
     </div>
   }
 </div>
+
+<!-- Checkout Dialog -->
+<p-dialog
+  header="Thanh toán đơn hàng"
+  [visible]="checkoutDialogVisible()"
+  (visibleChange)="checkoutDialogVisible.set($event)"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+  [closable]="true"
+  [closeOnEscape]="true">
+
+  <div class="checkout-content">
+    <div class="order-summary">
+      <h3>Tóm tắt đơn hàng</h3>
+      <div class="order-items">
+        @for (item of cartService.cartItems(); track item.id) {
+          <div class="order-item">
+            <span>{{ item.title }} (x{{ item.quantity }})</span>
+            <span>{{ item.price * item.quantity | currency:'VND':'symbol':'1.0-0' }}</span>
+          </div>
+        }
+      </div>
+      <div class="order-total">
+        <strong>Tổng cộng: {{ cartService.totalPrice() | currency:'VND':'symbol':'1.0-0' }}</strong>
+      </div>
+    </div>
+
+    <form [formGroup]="checkoutForm" (ngSubmit)="submitOrder()" class="checkout-form">
+      <div class="form-group">
+        <label for="shipping_address">Địa chỉ giao hàng *</label>
+        <textarea
+          id="shipping_address"
+          formControlName="shipping_address"
+          placeholder="Nhập địa chỉ giao hàng chi tiết"
+          rows="3"></textarea>
+        @if (checkoutForm.get('shipping_address')?.invalid && checkoutForm.get('shipping_address')?.touched) {
+          <small class="error-text">Vui lòng nhập địa chỉ giao hàng</small>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="payment_method">Phương thức thanh toán *</label>
+        <select id="payment_method" formControlName="payment_method">
+          <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+          <option value="Bank Transfer">Chuyển khoản ngân hàng</option>
+        </select>
+      </div>
+    </form>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button
+      type="button"
+      class="btn-cancel"
+      (click)="closeCheckoutDialog()">
+      Hủy
+    </button>
+    <button
+      type="button"
+      class="btn-submit"
+      [disabled]="checkoutForm.invalid || isProcessingOrder"
+      (click)="submitOrder()">
+      {{ isProcessingOrder ? 'Đang xử lý...' : 'Đặt hàng' }}
+    </button>
+  </ng-template>
+</p-dialog>

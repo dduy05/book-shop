@@ -7,6 +7,8 @@ const bookRoutes = require('./src/routes/bookRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes');
 const wishlistRoutes = require('./src/routes/wishlistRoutes');
+const orderRoutes = require('./src/routes/orderRoutes');
+const userRoutes = require('./src/routes/userRoutes');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +40,12 @@ app.use('/api/categories', categoryRoutes);
 
 // Routes wishlist
 app.use('/api/wishlist', wishlistRoutes);
+
+// Routes orders
+app.use('/api/orders', orderRoutes);
+
+// Routes users
+app.use('/api/users', userRoutes);
 
 // ── 404 Handler ─────────────────────────────────────────
 app.use((req, res) => {

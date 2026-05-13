@@ -41,6 +41,28 @@ CREATE TABLE IF NOT EXISTS wishlists (
   UNIQUE (user_id, book_id)
 );
 
+-- Create orders table for order management
+CREATE TABLE IF NOT EXISTS orders (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  total_amount INTEGER NOT NULL,
+  status VARCHAR(50) DEFAULT 'pending', -- pending, confirmed, shipped, delivered, cancelled
+  shipping_address TEXT,
+  payment_method VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create order_details table for order items
+CREATE TABLE IF NOT EXISTS order_details (
+  id SERIAL PRIMARY KEY,
+  order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+  book_id INTEGER REFERENCES books(id) ON DELETE CASCADE,
+  quantity INTEGER NOT NULL,
+  price INTEGER NOT NULL, -- price at the time of order
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Insert sample categories
 INSERT INTO categories (name, description) VALUES
 ('Viễn tưởng', 'Sách viễn tưởng'),
@@ -56,3 +78,25 @@ INSERT INTO users (name, email, password, role) VALUES
 ('Admin', 'admin@example.com', '$2a$10$IcjIc8CAylpoqsP86Q3sV.ZTkhNPhI26xQBh62KGApm5rOZ2s32g6', 'ADMIN'),  -- password: test123
 ('User', 'user@example.com', '$2a$10$IcjIc8CAylpoqsP86Q3sV.ZTkhNPhI26xQBh62KGApm5rOZ2s32g6', 'USER')      -- password: test123
 ON CONFLICT (email) DO NOTHING;
+
+-- Insert sample books
+INSERT INTO books (title, author, category_id, price, quantity, description) VALUES
+('Dune', 'Frank Herbert', 1, 150000, 10, 'Một cuốn sách viễn tưởng kinh điển'),
+('The Shining', 'Stephen King', 2, 120000, 8, 'Một cuốn sách kinh dị về khách sạn ma ám'),
+('Sapiens', 'Yuval Noah Harari', 3, 180000, 15, 'Lịch sử loài người từ thời tiền sử đến hiện đại'),
+('The Guns of August', 'Barbara Tuchman', 4, 140000, 5, 'Mô tả về Thế chiến I'),
+('The Bourne Identity', 'Robert Ludlum', 5, 130000, 12, 'Một cuốn sách hành động về điệp viên')
+ON CONFLICT DO NOTHING;
+
+-- Insert sample orders
+INSERT INTO orders (user_id, total_amount, status, shipping_address, payment_method) VALUES
+(2, 270000, 'confirmed', '123 Đường ABC, Quận 1, TP.HCM', 'COD'),
+(2, 150000, 'pending', '456 Đường XYZ, Quận 2, TP.HCM', 'Bank Transfer')
+ON CONFLICT DO NOTHING;
+
+-- Insert sample order details
+INSERT INTO order_details (order_id, book_id, quantity, price) VALUES
+(1, 1, 1, 150000), -- Dune in order 1
+(1, 2, 1, 120000), -- The Shining in order 1
+(2, 1, 1, 150000)  -- Dune in order 2
+ON CONFLICT DO NOTHING;

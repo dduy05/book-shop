@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 
 // PrimeNG Modules
 import { TableModule } from 'primeng/table';
@@ -20,6 +20,8 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 // App
 import { BookService } from '../../services/book.service';
 import { CategoryService, Category } from '../../services/category.service';
+import { UserService, User } from '../../services/user.service';
+import { OrderService, Order, OrderItem } from '../../services/order.service';
 import { Book } from '../../models/book.model';
 
 @Component({
@@ -28,6 +30,7 @@ import { Book } from '../../models/book.model';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     TableModule,
     ButtonModule,
     TagModule,
@@ -46,13 +49,22 @@ import { Book } from '../../models/book.model';
 export class AdminComponent implements OnInit {
   private bookService = inject(BookService);
   private categoryService = inject(CategoryService);
+  private userService = inject(UserService);
+  private orderService = inject(OrderService);
   private fb = inject(FormBuilder);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
 
   books = signal<Book[]>([]);
   categories = signal<Category[]>([]);
+  users = signal<User[]>([]);
+  orders = signal<Order[]>([]);
   loading = signal(true);
+  activeTab: 'books' | 'users' | 'orders' = 'books';
+
+  setActiveTab(tab: 'books' | 'users' | 'orders'): void {
+    this.activeTab = tab;
+  }
 
   // Dialog state
   dialogVisible = false;
@@ -63,6 +75,10 @@ export class AdminComponent implements OnInit {
   categoryDialogVisible = false;
   isEditCategoryMode = false;
   editingCategoryId: number | null = null;
+
+  // Order detail dialog state
+  orderDetailDialogVisible = false;
+  selectedOrder: Order | null = null;
 
   // Reactive Form
   bookForm: FormGroup = this.fb.group({
@@ -81,9 +97,24 @@ export class AdminComponent implements OnInit {
     description: [''],
   });
 
+  // Dropdown options
+  userRoleOptions = [
+    { label: 'User', value: 'USER' },
+    { label: 'Admin', value: 'ADMIN' }
+  ];
+
+  orderStatusOptions = [
+    { label: 'Chờ xác nhận', value: 'PENDING' },
+    { label: 'Đã xác nhận', value: 'CONFIRMED' },
+    { label: 'Đang giao', value: 'SHIPPED' },
+    { label: 'Đã giao', value: 'DELIVERED' }
+  ];
+
   ngOnInit() {
     this.loadBooks();
     this.loadCategories();
+    this.loadUsers();
+    this.loadOrders();
   }
 
   loadBooks(): void {
@@ -98,6 +129,23 @@ export class AdminComponent implements OnInit {
     this.categoryService.getCategories().subscribe({
       next: (data) => this.categories.set(data),
       error: (err) => console.error('Lỗi khi tải categories:', err)
+    });
+  }
+
+  loadUsers(): void {
+    this.userService.getAllUsers().subscribe({
+      next: (data) => this.users.set(data),
+      error: (err) => console.error('Lỗi khi tải users:', err)
+    });
+  }
+
+  loadOrders(): void {
+    this.orderService.getAllOrders().subscribe({
+      next: (data) => this.orders.set(data.map(order => ({
+        ...order,
+        status: (typeof order.status === 'string' ? order.status.toUpperCase() : order.status) as Order['status']
+      }))),
+      error: (err) => console.error('Lỗi khi tải orders:', err)
     });
   }
 
@@ -316,5 +364,169 @@ export class AdminComponent implements OnInit {
     if (ctrl.errors['required'])   return 'Trường này là bắt buộc.';
     if (ctrl.errors['minlength'])  return `Tối thiểu ${ctrl.errors['minlength'].requiredLength} ký tự.`;
     return 'Giá trị không hợp lệ.';
+  }
+
+  // ── User Management Methods ──
+
+  onUpdateUserRole(user: User): void {
+    const newRole = user.role === 'USER' ? 'ADMIN' : 'USER';
+    this.confirmationService.confirm({
+      message: `Bạn có chắc muốn thay đổi role của <strong>${user.name}</strong> thành <strong>${newRole}</strong>?`,
+      header: 'Xác nhận thay đổi role',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Xác nhận',
+      rejectLabel: 'Hủy',
+      accept: () => {
+        this.userService.updateUserRole(user.id, newRole).subscribe({
+          next: (updatedUser) => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Thành công',
+              detail: `Đã cập nhật role của ${updatedUser.name}`
+            });
+            this.loadUsers();
+          },
+          error: (err) => {
+            console.error('Lỗi cập nhật role:', err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Lỗi',
+              detail: 'Không thể cập nhật role người dùng'
+            });
+          }
+        });
+      }
+    });
+  }
+
+  onDeleteUser(user: User): void {
+    this.confirmationService.confirm({
+      message: `Bạn có chắc muốn xóa người dùng "<strong>${user.name}</strong>"?`,
+      header: 'Xác nhận xóa',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Xóa',
+      rejectLabel: 'Hủy',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.userService.deleteUser(user.id).subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Đã xóa',
+              detail: `Đã xóa người dùng "${user.name}"`
+            });
+            this.loadUsers();
+          },
+          error: (err) => {
+            console.error('Lỗi xóa user:', err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Lỗi',
+              detail: 'Không thể xóa người dùng'
+            });
+          }
+        });
+      }
+    });
+  }
+
+  // ── Order Management Methods ──
+
+  onUpdateOrderStatus(order: Order): void {
+    // Tạo dropdown để chọn status mới
+    const currentStatus = order.status;
+    // Logic này sẽ được xử lý trong template với dropdown
+  }
+
+  updateOrderStatus(order: Order, newStatus: Order['status']): void {
+    if (newStatus === order.status) {
+      return;
+    }
+
+    const oldStatus = order.status;
+
+    this.orderService.updateOrderStatus(order.id, newStatus).subscribe({
+      next: (updatedOrder) => {
+        // Cập nhật status trong order object
+        order.status = newStatus as Order['status'];
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Thành công',
+          detail: `Đã cập nhật trạng thái đơn hàng #${updatedOrder.id}`
+        });
+      },
+      error: (err) => {
+        console.error('Lỗi cập nhật order status:', err);
+        // Revert lại giá trị cũ nếu lỗi
+        order.status = oldStatus;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Lỗi',
+          detail: 'Không thể cập nhật trạng thái đơn hàng'
+        });
+      }
+    });
+  }
+
+  onCancelOrder(order: Order): void {
+    this.confirmationService.confirm({
+      message: `Bạn có chắc muốn hủy đơn hàng #<strong>${order.id}</strong>?`,
+      header: 'Xác nhận hủy đơn hàng',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Hủy đơn',
+      rejectLabel: 'Không hủy',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.updateOrderStatus(order, 'CANCELLED');
+      }
+    });
+  }
+
+  onViewOrder(order: Order): void {
+    this.selectedOrder = null;
+    this.orderDetailDialogVisible = true;
+
+    this.orderService.getOrderById(order.id).subscribe({
+      next: (data) => {
+        this.selectedOrder = {
+          ...data,
+          status: (typeof data.status === 'string' ? data.status.toUpperCase() : data.status) as Order['status']
+        };
+      },
+      error: (err) => {
+        console.error('Lỗi tải chi tiết đơn hàng:', err);
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể tải chi tiết đơn hàng' });
+      }
+    });
+  }
+
+  getOrderItems(order: Order | null): OrderItem[] {
+    return order ? (order.items ?? order.order_details ?? []) : [];
+  }
+
+  // ── Helper Methods ──
+
+  getUserRoleSeverity(role: string): 'success' | 'info' {
+    return role === 'ADMIN' ? 'success' : 'info';
+  }
+
+  getOrderStatusSeverity(status: string): 'info' | 'success' | 'warning' | 'danger' {
+    switch (status) {
+      case 'PENDING': return 'info';
+      case 'CONFIRMED': return 'success';
+      case 'SHIPPED': return 'warning';
+      case 'DELIVERED': return 'success';
+      case 'CANCELLED': return 'danger';
+      default: return 'info';
+    }
+  }
+
+  formatCurrency(amount: number): string {
+    return amount.toLocaleString('vi-VN') + ' VND';
+  }
+
+  formatDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('vi-VN');
   }
 }

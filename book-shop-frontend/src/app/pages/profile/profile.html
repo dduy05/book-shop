@@ -24,12 +24,31 @@
       </div>
     </div>
 
-    <div class="profile-card form-card">
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'password'"
+        (click)="activeTab = 'password'">
+        <i class="pi pi-lock"></i>
+        Đổi mật khẩu
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'orders'"
+        (click)="activeTab = 'orders'">
+        <i class="pi pi-shopping-cart"></i>
+        Đơn hàng của tôi
+      </button>
+    </div>
+
+    <!-- Password Tab -->
+    <div class="profile-card form-card" *ngIf="activeTab === 'password'">
       <h3 class="form-title">Đổi mật khẩu</h3>
       <p class="form-subtitle">Để bảo mật tài khoản, vui lòng không chia sẻ mật khẩu cho người khác.</p>
 
       <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()">
-        
+
         <div class="form-group">
           <label>Mật khẩu hiện tại</label>
           <input type="password" formControlName="oldPassword" placeholder="Nhập mật khẩu hiện tại">
@@ -53,7 +72,7 @@
           <label>Xác nhận mật khẩu mới</label>
           <input type="password" formControlName="confirmPassword" placeholder="Nhập lại mật khẩu mới">
           @if (passwordForm.get('confirmPassword')?.hasError('required') && passwordForm.get('confirmPassword')?.touched) {
-            <small class="error-text">Vui lòng xác nhận mật khẩu.</small>
+            <small class="error-text">Vui lòng xác nhận mật khẩu mới.</small>
           }
           @if (passwordForm.get('confirmPassword')?.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched) {
             <small class="error-text">Mật khẩu xác nhận không khớp!</small>
@@ -65,6 +84,70 @@
         </button>
 
       </form>
+    </div>
+
+    <!-- Orders Tab -->
+    <div class="profile-card orders-card" *ngIf="activeTab === 'orders'">
+      <h3 class="form-title">Đơn hàng của tôi</h3>
+
+      @if (orders().length === 0) {
+        <div class="empty-orders">
+          <i class="pi pi-shopping-cart"></i>
+          <p>Bạn chưa có đơn hàng nào</p>
+        </div>
+      } @else {
+        <div class="orders-list">
+          @for (order of orders(); track order.id) {
+            <div class="order-item">
+              <div class="order-header">
+                <div class="order-info">
+                  <h4>Đơn hàng #{{ order.id }}</h4>
+                  <p class="order-date">{{ order.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+                </div>
+                <div class="order-status">
+                  <span class="status-badge" [class]="'status-' + order.status">
+                    {{ getStatusLabel(order.status) }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="order-items">
+                @for (item of getOrderItems(order); track item.id) {
+                  <div class="order-item-row">
+                    <div class="item-info">
+                      @if (item.book_image) {
+                        <img [src]="item.book_image" [alt]="item.book_title" class="item-image">
+                      } @else {
+                        <div class="item-placeholder">📖</div>
+                      }
+                      <div class="item-details">
+                        <h5>{{ item.book_title }}</h5>
+                        <p class="item-author">{{ item.book_author }}</p>
+                        <p class="item-quantity">Số lượng: {{ item.quantity }}</p>
+                      </div>
+                    </div>
+                    <div class="item-price">
+                      {{ item.price | currency:'VND':'symbol':'1.0-0' }}
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="order-footer">
+                <div class="order-total">
+                  <strong>Tổng cộng: {{ order.total_amount | currency:'VND':'symbol':'1.0-0' }}</strong>
+                </div>
+                @if (order.shipping_address) {
+                  <div class="order-address">
+                    <i class="pi pi-map-marker"></i>
+                    {{ order.shipping_address }}
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
     </div>
 
   </div>
