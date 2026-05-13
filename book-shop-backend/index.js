@@ -6,6 +6,7 @@ const db      = require('./src/config/db'); // Trigger kiểm tra kết nối DB
 const bookRoutes = require('./src/routes/bookRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes');
+const wishlistRoutes = require('./src/routes/wishlistRoutes');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +17,9 @@ app.use(cors());
 
 // Đọc request body dạng JSON
 app.use(express.json());
+
+// Phục vụ file tĩnh (hình ảnh) từ thư mục public
+app.use(express.static('public'));
 
 // ── Routes ──────────────────────────────────────────────
 // Route kiểm tra server đang chạy
@@ -31,6 +35,9 @@ app.use('/api/books', bookRoutes);
 
 // Routes categories
 app.use('/api/categories', categoryRoutes);
+
+// Routes wishlist
+app.use('/api/wishlist', wishlistRoutes);
 
 // ── 404 Handler ─────────────────────────────────────────
 app.use((req, res) => {

@@ -45,7 +45,7 @@ const getBookById = async (req, res) => {
 // POST /api/books — Thêm sách mới
 const createBook = async (req, res) => {
   try {
-    const { title, author, category_id, price, image, description } = req.body;
+    const { title, author, category_id, price, quantity, image, description } = req.body;
 
     if (!title || !author || !price) {
       return res.status(400).json({
@@ -54,12 +54,13 @@ const createBook = async (req, res) => {
       });
     }
 
+    const bookQuantity = quantity ?? 0;
     const sql = `
-      INSERT INTO books (title, author, category_id, price, image, description)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO books (title, author, category_id, price, quantity, image, description)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
-    const result = await pool.query(sql, [title, author, category_id, price, image, description]);
+    const result = await pool.query(sql, [title, author, category_id, price, bookQuantity, image, description]);
 
     res.status(201).json({ status: 'success', data: result.rows[0] });
   } catch (err) {
@@ -72,15 +73,16 @@ const createBook = async (req, res) => {
 const updateBook = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, author, category_id, price, image, description } = req.body;
+    const { title, author, category_id, price, quantity, image, description } = req.body;
 
+    const bookQuantity = quantity ?? 0;
     const sql = `
       UPDATE books
-      SET title = $1, author = $2, category_id = $3, price = $4, image = $5, description = $6
-      WHERE id = $7
+      SET title = $1, author = $2, category_id = $3, price = $4, quantity = $5, image = $6, description = $7
+      WHERE id = $8
       RETURNING *
     `;
-    const result = await pool.query(sql, [title, author, category_id, price, image, description, id]);
+    const result = await pool.query(sql, [title, author, category_id, price, bookQuantity, image, description, id]);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ status: 'error', message: `Không tìm thấy sách với id = ${id}` });

@@ -30,6 +30,17 @@ CREATE TABLE IF NOT EXISTS books (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE books ADD quantity INTEGER DEFAULT 0;
+
+-- Create wishlist table for saved user favorites
+CREATE TABLE IF NOT EXISTS wishlists (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  book_id INTEGER REFERENCES books(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (user_id, book_id)
+);
+
 -- Insert sample categories
 INSERT INTO categories (name, description) VALUES
 ('Viễn tưởng', 'Sách viễn tưởng'),

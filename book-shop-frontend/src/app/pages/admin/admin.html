@@ -48,7 +48,8 @@
           <th style="width:80px; text-align:center">Ảnh</th>
           <th pSortableColumn="title">Tên sách <p-sortIcon field="title" /></th>
           <th pSortableColumn="author" style="width:160px">Tác giả <p-sortIcon field="author" /></th>
-          <th pSortableColumn="price"  style="width:130px">Giá <p-sortIcon field="price" /></th>
+          <th pSortableColumn="price"  style="width:120px">Giá <p-sortIcon field="price" /></th>
+          <th style="width:100px; text-align:center">Tồn kho</th>
           <th pSortableColumn="category_name" style="width:140px">Thể loại <p-sortIcon field="category_name" /></th>
           <th style="width:120px; text-align:center">Thao tác</th>
         </tr>
@@ -77,7 +78,7 @@
           <td class="col-author">{{ book.author }}</td>
 
           <td class="col-price">{{ book.price | currency:'VND':'symbol':'1.0-0' }}</td>
-
+          <td class="col-quantity" style="text-align:center">{{ book.quantity ?? 0 }}</td>
           <td class="col-category"><span class="cat-badge">{{ book.category_name }}</span></td>
 
           <!-- Nút thao tác -->
@@ -95,7 +96,7 @@
       <!-- Không có dữ liệu -->
       <ng-template #emptymessage>
         <tr>
-          <td colspan="7" class="empty-cell">
+          <td colspan="8" class="empty-cell">
             <div class="empty-box">
               <span style="font-size:2.5rem">📭</span>
               <p>Chưa có sách nào trong danh mục.</p>
@@ -224,7 +225,7 @@
         }
       </div>
 
-      <!-- Giá & Thể loại -->
+      <!-- Giá -->
       <div class="form-row">
         <div class="form-field">
           <label for="price">Giá (VND) <span class="required">*</span></label>
@@ -239,19 +240,31 @@
         </div>
 
         <div class="form-field">
-          <label for="category_id">Thể loại <span class="required">*</span></label>
-          <select id="category_id" formControlName="category_id"
-                  [class.ng-invalid]="isInvalid('category_id')"
-                  [class.ng-dirty]="isInvalid('category_id')">
-            <option value="">-- Chọn thể loại --</option>
-            @for (cat of categories(); track cat.id) {
-              <option [value]="cat.id">{{ cat.name }}</option>
-            }
-          </select>
-          @if (isInvalid('category_id')) {
-            <small class="error-msg">{{ getError('category_id') }}</small>
+          <label for="quantity">Số lượng <span class="required">*</span></label>
+          <p-inputNumber id="quantity" formControlName="quantity"
+                         [min]="0" [useGrouping]="true"
+                         [class.ng-invalid]="isInvalid('quantity')"
+                         [class.ng-dirty]="isInvalid('quantity')" />
+          @if (isInvalid('quantity')) {
+            <small class="error-msg">{{ getError('quantity') }}</small>
           }
         </div>
+      </div>
+
+      <!-- Thể loại -->
+      <div class="form-field">
+        <label for="category_id">Thể loại <span class="required">*</span></label>
+        <select id="category_id" formControlName="category_id"
+                [class.ng-invalid]="isInvalid('category_id')"
+                [class.ng-dirty]="isInvalid('category_id')">
+          <option value="">-- Chọn thể loại --</option>
+          @for (cat of categories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+        @if (isInvalid('category_id')) {
+          <small class="error-msg">{{ getError('category_id') }}</small>
+        }
       </div>
 
       <!-- URL Ảnh -->

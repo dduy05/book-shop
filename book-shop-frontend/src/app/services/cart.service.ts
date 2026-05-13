@@ -17,16 +17,23 @@ export class CartService {
     this.cartItems().reduce((sum, item) => sum + item.price * item.quantity, 0)
   );
 
-  addToCart(book: Book): void {
+  addToCart(book: Book, qty = 1): boolean {
+    const available = book.quantity ?? 0;
+    if (qty < 1 || qty > available) {
+      return false;
+    }
+
     this.cartItems.update(items => {
       const existing = items.find(i => i.id === book.id);
       if (existing) {
         return items.map(i =>
-          i.id === book.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === book.id ? { ...i, quantity: i.quantity + qty } : i
         );
       }
-      return [...items, { ...book, quantity: 1 }];
+      return [...items, { ...book, quantity: qty }];
     });
+
+    return true;
   }
 
   removeFromCart(bookId: number): void {

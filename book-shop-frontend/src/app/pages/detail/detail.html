@@ -1,18 +1,151 @@
 <div class="detail-container">
   @if (book(); as b) {
-    <div class="book-info">
-      <img [src]="b.image" [alt]="b.title" width="300">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <a href="/">Trang chủ</a>
+      <span>/</span>
+      <a [href]="'/?category=' + b.category_id">{{ b.category_name || 'Sách' }}</a>
+      <span>/</span>
+      <span class="current">{{ b.title }}</span>
+    </div>
+
+    <!-- Main Content -->
+    <div class="book-detail">
       
-      <div class="info-text">
-        <h2>{{ b.title }}</h2>
-        <p><strong>Tác giả:</strong> {{ b.author }}</p>
-        <p><strong>Thể loại:</strong> {{ b.category_name || 'Chưa phân loại' }}</p>
-        <p class="price">{{ b.price | currency:'VND' }}</p> <p class="desc">{{ b.description }}</p>
+      <!-- Left: Book Image -->
+      <div class="book-image-section">
+        <div class="book-cover">
+          @if (b.image) {
+            <img [src]="b.image" [alt]="b.title" class="book-img">
+          } @else {
+            <div class="book-placeholder">📖</div>
+          }
+        </div>
+        <div class="book-actions-mobile">
+          <button 
+            (click)="toggleWishlist(b)"
+            [class.active]="isInWishlist()"
+            class="btn-wishlist" 
+            title="Thêm vào danh sách yêu thích">
+            <i class="pi pi-heart"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Book Info -->
+      <div class="book-info-section">
         
-        <button (click)="onAddToCart(b)" class="btn-add">Thêm vào giỏ hàng</button>
+        <!-- Title & Author -->
+        <div class="book-header">
+          <h1 class="book-title">{{ b.title }}</h1>
+          <p class="book-author">
+            <i class="pi pi-user"></i>
+            {{ b.author }}
+          </p>
+        </div>
+
+        <!-- Price Section -->
+        <div class="price-section">
+          <span class="price-label">Giá:</span>
+          <span class="price">{{ b.price | currency:'VND':'symbol':'1.0-0' }}</span>
+        </div>
+
+        <!-- Category & Status -->
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Thể loại:</label>
+            <span>{{ b.category_name || 'Chưa phân loại' }}</span>
+          </div>
+          <div class="info-item">
+            <label>Trạng thái:</label>
+            <span [class.in-stock]="b.quantity && b.quantity > 0"
+                  [class.out-of-stock]="!b.quantity || b.quantity === 0">
+              {{ b.quantity && b.quantity > 0 ? '✓ Còn hàng' : '✕ Hết hàng' }}
+            </span>
+          </div>
+          <div class="info-item">
+            <label>Tồn kho:</label>
+            <span>{{ b.quantity ?? 0 }} cuốn</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="description-section">
+          <h3>Mô tả sản phẩm</h3>
+          <p class="description">{{ b.description }}</p>
+        </div>
+
+        <!-- Quantity Selector -->
+        <div class="quantity-section">
+          <label for="quantity">Số lượng:</label>
+          <div class="quantity-picker">
+            <button 
+              class="qty-btn" 
+              (click)="decreaseQuantity()"
+              [disabled]="quantity() <= 1 || !b.quantity || b.quantity === 0"
+              aria-label="Giảm số lượng">
+              −
+            </button>
+            <input 
+              id="quantity"
+              type="number" 
+              [value]="quantity()" 
+              (change)="setQuantity($event)"
+              [min]="b.quantity && b.quantity > 0 ? 1 : 0"
+              [max]="b.quantity ?? 0"
+              [disabled]="!b.quantity || b.quantity === 0"
+              class="qty-input"
+              aria-label="Nhập số lượng">
+            <button 
+              class="qty-btn" 
+              (click)="increaseQuantity()"
+              [disabled]="quantity() >= (b.quantity ?? 0) || !b.quantity || b.quantity === 0"
+              aria-label="Tăng số lượng">
+              +
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button 
+            (click)="onAddToCart(b)" 
+            [disabled]="!b.quantity || b.quantity === 0"
+            class="btn-add-to-cart">
+            <i class="pi pi-shopping-cart"></i>
+            {{ b.quantity && b.quantity > 0 ? 'Thêm vào giỏ hàng' : 'Hết hàng' }}
+          </button>
+          <button 
+            (click)="toggleWishlist(b)"
+            [class.active]="isInWishlist()"
+            class="btn-wishlist-desktop" 
+            title="Thêm vào danh sách yêu thích">
+            <i class="pi pi-heart"></i>
+          </button>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="additional-info">
+          <div class="info-row">
+            <i class="pi pi-check-circle"></i>
+            <span>Bảo hành chất lượng 100%</span>
+          </div>
+          <div class="info-row">
+            <i class="pi pi-truck"></i>
+            <span>Giao hàng miễn phí từ 100.000đ</span>
+          </div>
+          <div class="info-row">
+            <i class="pi pi-shield"></i>
+            <span>Thanh toán an toàn và bảo mật</span>
+          </div>
+        </div>
       </div>
     </div>
+
   } @else {
-    <p>Đang tải thông tin sách...</p>
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Đang tải thông tin sách...</p>
+    </div>
   }
 </div>

@@ -1,39 +1,42 @@
 <div class="home-page">
 
-  <!-- ══════════════════════════════════════
-       THANH TAB BAR NGANG
-  ══════════════════════════════════════ -->
-  <div class="tab-bar-wrapper">
-    <div class="tab-bar">
 
-      @for (tab of visibleTabs(); track tab.index) {
-        <div
-          class="tab-item"
-          [class.tab-active]="isActive(tab.index)"
-          (click)="selectTab(tab.index)"
-          role="tab"
-          [attr.aria-selected]="isActive(tab.index)"
-        >
-          <i [class]="tab.icon" class="tab-icon"></i>
-          <span class="tab-label">{{ tab.label }}</span>
-          <button
-            class="tab-close"
-            (click)="closeTab(tab.index, $event)"
-            title="Đóng tab"
-            aria-label="Đóng tab"
-          >×</button>
+  <!-- Banner tổng quan -->
+  <div class="banner-section">
+    <div class="banner-text">
+      <p class="banner-tagline">dám <strong>BÁN SÁCH</strong> dám <strong>TỬ TẾ</strong></p>
+      <p class="banner-desc">
+        Chúng tôi là cửa hàng sách cam kết mang đến những cuốn sách chất lượng,
+        giá cả hợp lý và dịch vụ tận tâm. Từ sách kỹ năng sống, văn học đến sách
+        chuyên ngành — tất cả đều có tại đây.
+      </p>
+      <div class="banner-stats">
+        <div class="stat-item">
+          <span class="stat-number">500+</span>
+          <span class="stat-label">Đầu sách</span>
         </div>
-      }
-
-      <!-- Dải màu chỉ thị active trượt theo -->
-      <div class="tab-bar-end"></div>
+        <div class="stat-item">
+          <span class="stat-number">1.2K+</span>
+          <span class="stat-label">Khách hàng</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">4.9★</span>
+          <span class="stat-label">Đánh giá</span>
+        </div>
+      </div>
     </div>
+    <div class="banner-mascot">🐱</div>
   </div>
 
-  <!-- ══════════════════════════════════════
-       FILTER THEO THỂ LOẠI
-  ══════════════════════════════════════ -->
-  <div class="filter-section">
+
+
+  <div class="section-title">
+    <i class="pi pi-book"></i>
+    <h2>Tất cả sách</h2>
+  </div>
+
+<!-- Filter theo thể loại -->
+  <div class="filter-section" style="margin-bottom: 20px;">
     <div class="filter-group">
       <label for="category-filter">Lọc theo thể loại:</label>
       <select id="category-filter" (change)="selectCategory($event)">
@@ -45,116 +48,34 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════
-       NỘI DUNG CÁC TAB
-  ══════════════════════════════════════ -->
-  <div class="tab-content">
-
-    <!-- ── TAB 0: Tổng quan ── -->
-    @if (isActive(0)) {
-      <div class="tab-panel">
-
-        <!-- Banner tổng quan -->
-        <div class="banner-section">
-          <div class="banner-text">
-            <p class="banner-tagline">dám <strong>BÁN SÁCH</strong> dám <strong>TỬ TẾ</strong></p>
-            <p class="banner-desc">
-              Chúng tôi là cửa hàng sách cam kết mang đến những cuốn sách chất lượng,
-              giá cả hợp lý và dịch vụ tận tâm. Từ sách kỹ năng sống, văn học đến sách
-              chuyên ngành — tất cả đều có tại đây.
-            </p>
-            <div class="banner-stats">
-              <div class="stat-item">
-                <span class="stat-number">500+</span>
-                <span class="stat-label">Đầu sách</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">1.2K+</span>
-                <span class="stat-label">Khách hàng</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">4.9★</span>
-                <span class="stat-label">Đánh giá</span>
-              </div>
-            </div>
-          </div>
-          <div class="banner-mascot">🐱</div>
-        </div>
-
-        <!-- Danh sách sách (dùng chung ở tab Tổng quan) -->
-        <div class="section-title">
-          <i class="pi pi-book"></i>
-          <h2>Tất cả sách</h2>
-        </div>
-        <div class="book-grid">
-          @for (book of getFilteredBooks(); track book.id) {
-            <div class="book-item">
-              <div class="book-cover">
-                @if (book.image) {
-                  <img [src]="book.image" [alt]="book.title" />
-                } @else {
-                  <div class="book-placeholder">📖</div>
-                }
-              </div>
-              <div class="book-info">
-                <h3>{{ book.title }}</h3>
-                <p class="author">{{ book.author }}</p>
-                <p class="price">{{ book.price | currency:'VND':'symbol':'1.0-0' }}</p>
-              </div>
-              <div class="book-actions">
-                <button class="btn-detail" [routerLink]="['/detail', book.id]">Xem chi tiết</button>
-                <button class="btn-cart" (click)="onAddToCart(book)">🛒 Thêm vào giỏ</button>
-              </div>
-            </div>
-          } @empty {
-            <p class="loading">Đang tải dữ liệu...</p>
+<!-- Danh sách sách -->
+  <div class="book-grid">
+    @for (book of getFilteredBooks(); track book.id) {
+      <div class="book-item">
+        <div class="book-cover">
+          @if (book.image) {
+            <img [src]="book.image" [alt]="book.title" />
+          } @else {
+            <div class="book-placeholder">📖</div>
           }
         </div>
-
-      </div>
-    }
-
-    <!-- ── TAB 1: Sách mới ── -->
-    @if (isActive(1)) {
-      <div class="tab-panel tab-placeholder">
-        <div class="placeholder-icon">🆕</div>
-        <h3>Sách mới nhất</h3>
-        <p>Danh sách sách mới về trong tuần sẽ được hiển thị tại đây.</p>
-      </div>
-    }
-
-    <!-- ── TAB 2: Bán chạy ── -->
-    @if (isActive(2)) {
-      <div class="tab-panel tab-placeholder">
-        <div class="placeholder-icon">🔥</div>
-        <h3>Sách bán chạy</h3>
-        <p>Top sách được mua nhiều nhất tháng này sẽ hiển thị tại đây.</p>
-      </div>
-    }
-
-    <!-- ── TAB 3: Theo thể loại ── -->
-    @if (isActive(3)) {
-      <div class="tab-panel">
-        <div class="section-title">
-          <i class="pi pi-bookmark"></i>
-          <h2>Thể loại sách</h2>
+        <div class="book-info">
+          <h3>{{ book.title }}</h3>
+          <p class="author">{{ book.author }}</p>
+          <p class="price">{{ book.price | currency:'VND':'symbol':'1.0-0' }}</p>
         </div>
-        <div class="category-grid">
-          @for (cat of ['Tâm lý', 'Kỹ năng sống', 'Công nghệ', 'Văn học', 'Kinh tế', 'Thiếu nhi']; track cat) {
-            <div class="category-card">
-              <span class="cat-icon">📚</span>
-              <span>{{ cat }}</span>
-            </div>
-          }
+        <div class="book-actions">
+          <button class="btn-detail" [routerLink]="['/detail', book.id]">Xem chi tiết</button>
+          <button class="btn-cart" (click)="onAddToCart(book)">🛒 Thêm vào giỏ</button>
         </div>
       </div>
+    } @empty {
+      <p class="loading">Đang tải dữ liệu...</p>
     }
-
   </div>
 
-</div>
 
-<!-- ══════════════════════════════════════
+  <!-- ══════════════════════════════════════
      NÚT LIÊN HỆ NỔI (nằm ngoài tab)
 ══════════════════════════════════════ -->
 <div class="floating-contacts">

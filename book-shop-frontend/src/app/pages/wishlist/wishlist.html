@@ -1,0 +1,125 @@
+<div class="wishlist-container">
+  <!-- Header -->
+  <div class="wishlist-header">
+    <h1>Danh sách yêu thích</h1>
+    <p class="wishlist-count">{{ wishlistService.totalItems() }} sách yêu thích</p>
+  </div>
+
+  @if (wishlistService.wishlistItems().length > 0) {
+    <!-- Wishlist Items -->
+    <div class="wishlist-content">
+      <!-- List View (Desktop) -->
+      <div class="wishlist-table-wrapper">
+        <table class="wishlist-table">
+          <thead>
+            <tr>
+              <th>Sách</th>
+              <th>Tác giả</th>
+              <th>Thể loại</th>
+              <th>Giá</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (book of wishlistService.wishlistItems(); track book.id) {
+              <tr class="wishlist-item">
+                <td class="book-cell">
+                  <div class="book-info-table">
+                    <div class="book-cover-small">
+                      @if (book.image) {
+                        <img [src]="book.image" [alt]="book.title" />
+                      } @else {
+                        <div class="placeholder">📖</div>
+                      }
+                    </div>
+                    <div class="book-details">
+                      <a [routerLink]="['/detail', book.id]" class="book-title-link">
+                        {{ book.title }}
+                      </a>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ book.author }}</td>
+                <td>{{ book.category_name || 'Chưa phân loại' }}</td>
+                <td class="price-cell">{{ book.price | currency:'VND':'symbol':'1.0-0' }}</td>
+                <td class="action-cell">
+                  <button 
+                    (click)="onAddToCart(book)" 
+                    class="btn-add-to-cart"
+                    title="Thêm vào giỏ hàng">
+                    <i class="pi pi-shopping-cart"></i>
+                    Giỏ hàng
+                  </button>
+                  <button 
+                    (click)="removeFromWishlist(book.id)" 
+                    class="btn-remove"
+                    title="Xóa khỏi danh sách yêu thích">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Grid View (Mobile) -->
+      <div class="wishlist-grid">
+        @for (book of wishlistService.wishlistItems(); track book.id) {
+          <div class="wishlist-card">
+            <div class="card-cover">
+              @if (book.image) {
+                <img [src]="book.image" [alt]="book.title" />
+              } @else {
+                <div class="placeholder">📖</div>
+              }
+            </div>
+            <div class="card-content">
+              <a [routerLink]="['/detail', book.id]" class="card-title">
+                {{ book.title }}
+              </a>
+              <p class="card-author">{{ book.author }}</p>
+              <p class="card-category">{{ book.category_name || 'Chưa phân loại' }}</p>
+              <p class="card-price">{{ book.price | currency:'VND':'symbol':'1.0-0' }}</p>
+              <div class="card-actions">
+                <button 
+                  (click)="onAddToCart(book)" 
+                  class="btn-add-to-cart">
+                  <i class="pi pi-shopping-cart"></i>
+                </button>
+                <button 
+                  (click)="removeFromWishlist(book.id)" 
+                  class="btn-remove">
+                  <i class="pi pi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="wishlist-actions">
+        <button (click)="clearAllWishlist()" class="btn-clear">
+          <i class="pi pi-times"></i>
+          Xóa tất cả
+        </button>
+        <a href="/" class="btn-continue">
+          <i class="pi pi-arrow-left"></i>
+          Tiếp tục mua sắm
+        </a>
+      </div>
+    </div>
+  } @else {
+    <!-- Empty State -->
+    <div class="empty-state">
+      <div class="empty-icon">💝</div>
+      <h2>Danh sách yêu thích trống</h2>
+      <p>Bạn chưa thêm bất kỳ sách nào vào danh sách yêu thích</p>
+      <a href="/" class="btn-explore">
+        <i class="pi pi-shopping-bag"></i>
+        Khám phá sách mới
+      </a>
+    </div>
+  }
+</div>

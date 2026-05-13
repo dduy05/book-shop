@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { BookService } from '../../services/book.service';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
+import { WishlistService } from '../../services/wishlist.service';
 import { Book } from '../../models/book.model';
 
 @Component({
@@ -14,24 +15,61 @@ import { Book } from '../../models/book.model';
   styleUrl: './detail.scss'
 })
 export class DetailComponent implements OnInit {
-  private route = inject(ActivatedRoute); // Dùng để đọc URL
-  private bookService = inject(BookService); // Gọi API
+  private route = inject(ActivatedRoute);
+  private bookService = inject(BookService);
   protected cartService = inject(CartService);
   protected authService = inject(AuthService);
+  protected wishlistService = inject(WishlistService);
   
-  // Dùng Signal quản lý dữ liệu cuốn sách (mặc định là null vì chưa có data)
   book = signal<Book | null>(null);
+  quantity = signal<number>(1);
+  isInWishlist = signal<boolean>(false);
 
   ngOnInit() {
-    // Lấy 'id' từ URL và chuyển thành số (Number)
     const id = Number(this.route.snapshot.paramMap.get('id'));
     
     if (id) {
       this.bookService.getBooks().subscribe({
-        next: (data: Book[]) => this.book.set(data.find(b => b.id === id) || null),
+        next: (data: Book[]) => {
+          const foundBook = data.find(b => b.id === id) || null;
+          this.book.set(foundBook);
+          if (foundBook) {
+            this.isInWishlist.set(this.wishlistService.isInWishlist(foundBook.id));
+            this.quantity.set(foundBook.quantity && foundBook.quantity > 0 ? 1 : 0);
+          }
+        },
         error: (err: any) => console.error('Lỗi khi tải chi tiết sách', err)
       });
     }
+  }
+
+  increaseQuantity(): void {
+    const book = this.book();
+    const available = book?.quantity ?? 0;
+    if (available > 0 && this.quantity() < available) {
+      this.quantity.update(q => q + 1);
+    }
+  }
+
+  decreaseQuantity(): void {
+    if (this.quantity() > 1) {
+      this.quantity.update(q => q - 1);
+    }
+  }
+
+  setQuantity(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = parseInt(input.value, 10);
+    const book = this.book();
+    const available = book?.quantity ?? 0;
+
+    if (isNaN(value) || value < 1) {
+      value = 1;
+    }
+    if (available > 0 && value > available) {
+      value = available;
+    }
+    this.quantity.set(value);
   }
 
   onAddToCart(book: Book): void {
@@ -39,6 +77,50 @@ export class DetailComponent implements OnInit {
       this.authService.isLoginDialogOpen.set(true);
       return;
     }
-    this.cartService.addToCart(book);
+
+    const available = book.quantity ?? 0;
+    const qty = this.quantity();
+
+    if (available <= 0) {
+      alert('Sách hiện đang hết hàng.');
+      return;
+    }
+
+    if (qty > available) {
+      alert(`Số lượng trong kho chỉ còn ${available} cuốn.`);
+      this.quantity.set(available);
+      return;
+    }
+
+    const added = this.cartService.addToCart(book, qty);
+    if (!added) {
+      alert('Không thể thêm vào giỏ hàng do số lượng tồn kho không đủ.');
+      return;
+    }
+
+    this.book.update(current => current ? { ...current, quantity: Math.max((current.quantity ?? 0) - qty, 0) } : current);
+    this.quantity.set(1);
+    console.log(`Đã thêm ${qty} cuốn "${book.title}" vào giỏ hàng`);
+  }
+
+  toggleWishlist(book: Book): void {
+    if (!this.authService.currentUser()) {
+      this.authService.isLoginDialogOpen.set(true);
+      return;
+    }
+
+    if (this.isInWishlist()) {
+      this.wishlistService.removeFromWishlist(book.id).subscribe(success => {
+        if (success) {
+          this.isInWishlist.set(false);
+        }
+      });
+    } else {
+      this.wishlistService.addToWishlist(book).subscribe(addedBook => {
+        if (addedBook) {
+          this.isInWishlist.set(true);
+        }
+      });
+    }
   }
 }

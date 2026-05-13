@@ -15,6 +15,11 @@
       }
     </a>
 
+    <a routerLink="/wishlist" routerLinkActive="active" class="nav-link nav-link-wishlist" title="Danh sách yêu thích">
+      <i class="pi pi-heart"></i>
+      <span>Yêu thích</span>
+    </a>
+
     @if (authService.currentUser()?.role === 'ADMIN') {
       <a routerLink="/admin" routerLinkActive="active" class="nav-link" title="Quản trị">
         <i class="pi pi-cog"></i>

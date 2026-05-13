@@ -69,6 +69,7 @@ export class AdminComponent implements OnInit {
     title:       ['', [Validators.required, Validators.minLength(2)]],
     author:      ['', [Validators.required]],
     price:       [0,  [Validators.required, Validators.min(1000)]],
+    quantity:    [0,  [Validators.required, Validators.min(0)]],
     category_id: [null, [Validators.required]],
     image:       [''],
     description: [''],
@@ -104,7 +105,7 @@ export class AdminComponent implements OnInit {
   onAddNew(): void {
     this.isEditMode = false;
     this.editingBookId = null;
-    this.bookForm.reset({ price: 0 });
+    this.bookForm.reset({ price: 0, quantity: 0 });
     this.dialogVisible = true;
   }
 
@@ -116,6 +117,7 @@ export class AdminComponent implements OnInit {
       title:       book.title,
       author:      book.author,
       price:       book.price,
+      quantity:    book.quantity ?? 0,
       category_id: book.category_id,
       image:       book.image,
       description: book.description,
@@ -202,7 +204,15 @@ export class AdminComponent implements OnInit {
     if (!ctrl || !ctrl.errors) return '';
     if (ctrl.errors['required'])   return 'Trường này là bắt buộc.';
     if (ctrl.errors['minlength'])  return `Tối thiểu ${ctrl.errors['minlength'].requiredLength} ký tự.`;
-    if (ctrl.errors['min'])        return `Giá phải lớn hơn ${ctrl.errors['min'].min.toLocaleString('vi')} VND.`;
+    if (ctrl.errors['min']) {
+      if (field === 'price') {
+        return `Giá phải lớn hơn ${ctrl.errors['min'].min.toLocaleString('vi')} VND.`;
+      }
+      if (field === 'quantity') {
+        return 'Số lượng phải lớn hơn hoặc bằng 0.';
+      }
+      return 'Giá trị phải hợp lệ.';
+    }
     return 'Giá trị không hợp lệ.';
   }
 
