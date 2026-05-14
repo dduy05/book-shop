@@ -9,6 +9,7 @@ const categoryRoutes = require('./src/routes/categoryRoutes');
 const wishlistRoutes = require('./src/routes/wishlistRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
 const userRoutes = require('./src/routes/userRoutes');
+const chatbotGetBooksRoutes = require('./chatbot/get_books');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -46,6 +47,9 @@ app.use('/api/orders', orderRoutes);
 
 // Routes users
 app.use('/api/users', userRoutes);
+
+// Routes chatbot - lấy danh sách sách
+app.use('/chatbot/get_books', chatbotGetBooksRoutes);
 
 // ── 404 Handler ─────────────────────────────────────────
 app.use((req, res) => {

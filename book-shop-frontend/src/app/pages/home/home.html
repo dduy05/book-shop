@@ -79,9 +79,6 @@
   </div>
 
 
-  <!-- ══════════════════════════════════════
-     NÚT LIÊN HỆ NỔI (nằm ngoài tab)
-══════════════════════════════════════ -->
 <div class="floating-contacts">
   <a href="https://zalo.me/0000000000" target="_blank" class="contact-btn zalo-btn" title="Zalo">
     <span class="contact-icon">💬</span>
@@ -91,8 +88,19 @@
     <span class="contact-icon">📞</span>
     <span class="contact-label">Gọi ngay</span>
   </a>
-  <button class="contact-btn search-btn" title="Tìm sách">
-    <span class="contact-icon">🔍</span>
-    <span class="contact-label">Nhận tìm sách</span>
+  <button class="contact-btn search-btn" (click)="openChatbot()" title="Tìm sách">
+    <span class="contact-icon">🤖</span>
+    <span class="contact-label">Chatbot</span>
   </button>
 </div>
+
+<p-dialog
+  [(visible)]="isChatbotDialogOpen"
+  [modal]="true"
+  [header]="'Trợ lý tư vấn sách'"
+  [style]="{ width: '500px' }"
+  [breakpoints]="{ '960px': '75vw', '640px': '90vw' }"
+  [draggable]="false"
+  (onHide)="closeChatbot()">
+  <app-chatbot></app-chatbot>
+</p-dialog>

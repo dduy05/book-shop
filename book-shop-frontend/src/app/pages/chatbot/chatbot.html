@@ -1,0 +1,49 @@
+<div class="chatbot-container">
+  <div class="chatbot-header">
+    <div class="header-content">
+      <i class="pi pi-comments"></i>
+      <h2>Trợ lý tư vấn sách</h2>
+    </div>
+    <button class="btn-clear" (click)="clearChat()" title="Xóa cuộc trò chuyện">
+      <i class="pi pi-trash"></i>
+    </button>
+  </div>
+
+  <div class="messages-container">
+    @for (msg of messages(); track $index) {
+      <div class="message" [ngClass]="msg.role">
+        <div class="message-bubble">
+          {{ msg.message }}
+        </div>
+        <span class="message-time">{{ msg.timestamp | date: 'HH:mm' }}</span>
+      </div>
+    }
+
+    @if (isLoading()) {
+      <div class="message bot">
+        <div class="message-bubble typing">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="input-area">
+    <textarea
+      [(ngModel)]="userInput"
+      (keypress)="onKeyPress($event)"
+      [disabled]="isLoading()"
+      placeholder="Hỏi gì về sách..."
+      rows="3"
+      class="input-field">
+    </textarea>
+    <button
+      (click)="sendMessage()"
+      [disabled]="!userInput().trim() || isLoading()"
+      class="btn-send">
+      <i class="pi pi-send"></i> Gửi
+    </button>
+  </div>
+</div>

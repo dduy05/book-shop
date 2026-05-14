@@ -2,18 +2,20 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { DialogModule } from 'primeng/dialog';
 import { BookService } from '../../services/book.service';
 import { CategoryService, Category } from '../../services/category.service';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
 import { Book } from '../../models/book.model';
+import { ChatbotComponent } from '../chatbot/chatbot';
 
 
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, DialogModule, ChatbotComponent],
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
@@ -27,6 +29,7 @@ export class HomeComponent implements OnInit {
   categories = signal<Category[]>([]);
   selectedCategoryId = signal<number | null>(null);
   searchTerm = signal<string>('');
+  isChatbotDialogOpen = signal<boolean>(false);
 
   // ── Methods ───────────────────────────────────────────
   ngOnInit(): void {
@@ -97,6 +100,17 @@ export class HomeComponent implements OnInit {
     return filtered;
   }
 
+  // Mở dialog chatbot
+  openChatbot(): void {
+    this.isChatbotDialogOpen.set(true);
+  }
+
+  // Đóng dialog chatbot
+  closeChatbot(): void {
+    this.isChatbotDialogOpen.set(false);
+  }
+
+  // 
   // Chọn category để filter
   selectCategory(event: Event): void {
     const target = event.target as HTMLSelectElement;

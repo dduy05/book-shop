@@ -5,6 +5,7 @@ import { CartComponent } from './pages/cart/cart';
 import { WishlistComponent } from './pages/wishlist/wishlist';
 import { AdminComponent } from './pages/admin/admin';
 import { ProfileComponent } from './pages/profile/profile';
+import { ChatbotComponent } from './pages/chatbot/chatbot';
 import { authGuard } from './guards/auth.guard';
 import { userGuard } from './guards/user.guard';
 
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: 'detail/:id', component: DetailComponent },
   { path: 'cart', component: CartComponent },
   { path: 'wishlist', component: WishlistComponent },
+  { path: 'chatbot', component: ChatbotComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [userGuard] },
   { path: 'admin', component: AdminComponent, canActivate: [authGuard] }
 ];
