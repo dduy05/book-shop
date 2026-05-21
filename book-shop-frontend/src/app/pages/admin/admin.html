@@ -20,6 +20,7 @@
     <button type="button" class="tab-button" [class.active]="activeTab==='books'" (click)="setActiveTab('books')">📚 Quản lý sách</button>
     <button type="button" class="tab-button" [class.active]="activeTab==='users'" (click)="setActiveTab('users')">👥 Quản lý người dùng</button>
     <button type="button" class="tab-button" [class.active]="activeTab==='orders'" (click)="setActiveTab('orders')">📦 Quản lý đơn hàng</button>
+    <button type="button" class="tab-button" [class.active]="activeTab==='posts'" (click)="setActiveTab('posts')">📝 Quản lý bài viết</button>
   </div>
 
   <!-- ══════════════════════════════════════
@@ -193,6 +194,108 @@
             </ng-template>
           </p-table>
         </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         TAB QUẢN LÝ BÀI VIẾT (ADMIN)
+    ══════════════════════════════════════ -->
+    <section *ngIf="activeTab === 'posts'" class="tab-content">
+      <div class="admin-posts-header">
+        <div>
+          <h2>Quản lý bài viết</h2>
+          <p class="admin-posts-subtitle">Xem, duyệt, từ chối hoặc xóa bài viết đã gửi bởi người dùng.</p>
+        </div>
+        <div class="admin-posts-stats">
+          <span><strong>{{ posts().length }}</strong> bài viết</span>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <p-table [value]="posts()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 20, 50]" responsiveLayout="scroll" stripedRows>
+          <ng-template #header>
+            <tr>
+              <th style="width:60px; text-align:center">ID</th>
+              <th>Tiêu đề</th>
+              <th>Tác giả</th>
+              <th style="width:120px; text-align:center">Trạng thái</th>
+              <th>Lý do từ chối</th>
+              <th style="width:260px; text-align:center">Thao tác</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-p>
+            <tr>
+              <td class="col-id">{{ p.id }}</td>
+              <td>
+                <div class="post-title">{{ p.title }}</div>
+                <div class="post-meta">{{ p.created_at ? (p.created_at | date:'dd/MM/yyyy') : '-' }}</div>
+              </td>
+              <td>
+                <div class="author-name">{{ p.author_name || 'Ẩn danh' }}</div>
+                <div class="author-email">{{ p.author_email }}</div>
+              </td>
+              <td style="text-align:center">
+                <p-tag [value]="p.status" [severity]="getStatusSeverity(p.status)"></p-tag>
+              </td>
+              <td>{{ p.rejection_reason || '-' }}</td>
+              <td class="col-actions">
+                <button pButton type="button" label="Xem" severity="secondary" (click)="onViewPost(p)"></button>
+                <button pButton type="button" label="Duyệt" severity="success" (click)="onApprovePost(p)" [disabled]="p.status !== 'pending'"></button>
+                <button pButton type="button" label="Từ chối" severity="warn" (click)="onOpenReject(p)" [disabled]="p.status !== 'pending'"></button>
+                <button pButton type="button" label="Xóa" severity="danger" (click)="onDeletePost(p)"></button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+
+      <p-dialog header="Lý do từ chối" [(visible)]="postRejectDialogVisible" [modal]="true" [closable]="true" [style]="{ width: '450px' }">
+        <div class="dialog-content">
+          <p class="reject-note">Hãy nhập lý do cụ thể để người dùng biết vì sao bài viết bị từ chối.</p>
+          <textarea rows="6" [(ngModel)]="rejectReason" class="reject-textarea"></textarea>
+        </div>
+        <ng-template pTemplate="footer">
+          <button pButton type="button" label="Hủy" class="p-button-text" (click)="postRejectDialogVisible = false"></button>
+          <button pButton type="button" label="Gửi" (click)="onRejectPostConfirm()"></button>
+        </ng-template>
+      </p-dialog>
+
+      <p-dialog header="Chi tiết bài viết" [(visible)]="postDetailDialogVisible" [modal]="true" [closable]="true" [style]="{ width: '720px' }" [draggable]="false" [resizable]="false">
+        <ng-container *ngIf="selectedPost; else noPostPost">
+          <div class="admin-post-detail">
+            <div class="admin-post-detail-header">
+              <h3>{{ selectedPost.title }}</h3>
+              <p-tag [value]="selectedPost.status" [severity]="getStatusSeverity(selectedPost.status)"></p-tag>
+            </div>
+            <div class="admin-post-meta">
+              <span><strong>Người đăng:</strong> {{ selectedPost.author_name || 'Ẩn danh' }}</span>
+              <span><strong>Ngày gửi:</strong> {{ selectedPost.created_at ? (selectedPost.created_at | date:'dd/MM/yyyy') : '-' }}</span>
+            </div>
+            <div *ngIf="selectedPost.image" class="admin-post-image">
+              <img [src]="getImageUrl(selectedPost.image)" alt="Ảnh bài viết" />
+            </div>
+            <div class="admin-post-content">
+              <h4>Nội dung</h4>
+              <p>{{ selectedPost.content || 'Không có nội dung.' }}</p>
+            </div>
+            <div *ngIf="selectedPost.rejection_reason" class="admin-post-rejection">
+              <h4>Lý do từ chối</h4>
+              <p>{{ selectedPost.rejection_reason }}</p>
+            </div>
+            <div *ngIf="selectedPost.books?.length" class="admin-post-books">
+              <h4>Sách liên quan</h4>
+              <ul>
+                <li *ngFor="let book of selectedPost.books">{{ book.title }}</li>
+              </ul>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #noPostPost>
+          <div>Không có thông tin bài viết để hiển thị.</div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+          <button pButton label="Đóng" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="closePostDetail()"></button>
+        </ng-template>
+      </p-dialog>
     </section>
 
     <!-- ══════════════════════════════════════
@@ -483,11 +586,19 @@
         <small *ngIf="isInvalid('category_id')" class="error-msg">{{ getError('category_id') }}</small>
       </div>
 
-      <!-- URL Ảnh -->
+      <!-- Ảnh bìa sách -->
       <div class="form-field">
-        <label for="image">URL Hình ảnh</label>
-        <input id="image" pInputText formControlName="image"
-               placeholder="https://..." />
+        <label for="image">Ảnh bìa sách</label>
+        <input id="image" type="file" accept="image/*"
+               (change)="onBookImageChange($event)"
+               class="file-input" />
+      </div>
+
+      <div class="form-field image-preview" *ngIf="bookImagePreview">
+        <label>Ảnh xem trước</label>
+        <div class="preview-box">
+          <img [src]="bookImagePreview" alt="Preview sách" />
+        </div>
       </div>
 
       <!-- Mô tả -->

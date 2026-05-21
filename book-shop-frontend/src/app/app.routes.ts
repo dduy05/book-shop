@@ -8,6 +8,10 @@ import { ProfileComponent } from './pages/profile/profile';
 import { ChatbotComponent } from './pages/chatbot/chatbot';
 import { authGuard } from './guards/auth.guard';
 import { userGuard } from './guards/user.guard';
+import { CreatePostComponent } from './pages/posts/create-post';
+import { MinePostsComponent } from './pages/posts/mine-posts';
+import { PostsListComponent } from './pages/posts/posts-list';
+import { PostDetailComponent } from './pages/posts/post-detail';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
@@ -16,5 +20,10 @@ export const routes: Routes = [
   { path: 'wishlist', component: WishlistComponent },
   { path: 'chatbot', component: ChatbotComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [userGuard] },
-  { path: 'admin', component: AdminComponent, canActivate: [authGuard] }
+  { path: 'admin', component: AdminComponent, canActivate: [authGuard] },
+  { path: 'posts', component: PostsListComponent },
+  { path: 'posts/create', component: CreatePostComponent, canActivate: [userGuard] },
+  { path: 'posts/create/:id', component: CreatePostComponent, canActivate: [userGuard] },
+  { path: 'posts/mine', component: MinePostsComponent, canActivate: [userGuard] },
+  { path: 'posts/:id', component: PostDetailComponent },
 ];

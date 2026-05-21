@@ -9,6 +9,7 @@ const categoryRoutes = require('./src/routes/categoryRoutes');
 const wishlistRoutes = require('./src/routes/wishlistRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
 const userRoutes = require('./src/routes/userRoutes');
+const postRoutes = require('./src/routes/postRoutes');
 const chatbotGetBooksRoutes = require('./chatbot/get_books');
 
 const app  = express();
@@ -47,6 +48,9 @@ app.use('/api/orders', orderRoutes);
 
 // Routes users
 app.use('/api/users', userRoutes);
+
+// Routes posts (user posts + admin moderation)
+app.use('/api/posts', postRoutes);
 
 // Routes chatbot - lấy danh sách sách
 app.use('/chatbot/get_books', chatbotGetBooksRoutes);

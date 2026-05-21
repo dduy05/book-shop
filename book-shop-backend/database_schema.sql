@@ -100,3 +100,25 @@ INSERT INTO order_details (order_id, book_id, quantity, price) VALUES
 (1, 2, 1, 120000), -- The Shining in order 1
 (2, 1, 1, 150000)  -- Dune in order 2
 ON CONFLICT DO NOTHING;
+
+-- Create posts table for user blog-like posts
+CREATE TABLE IF NOT EXISTS posts (
+  id SERIAL PRIMARY KEY,
+  author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  content TEXT,
+  image VARCHAR(500),
+  status VARCHAR(50) DEFAULT 'pending', -- pending, approved, rejected
+  rejection_reason TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Mapping table: which books are attached to a post
+CREATE TABLE IF NOT EXISTS post_books (
+  id SERIAL PRIMARY KEY,
+  post_id INTEGER REFERENCES posts(id) ON DELETE CASCADE,
+  book_id INTEGER REFERENCES books(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (post_id, book_id)
+);

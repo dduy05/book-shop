@@ -1,0 +1,41 @@
+<div class="posts-list">
+  <div class="page-header">
+    <div>
+      <h1>Tin tức & bài viết</h1>
+      <p class="subtitle">Cập nhật nội dung mới nhất từ cộng đồng và những bài viết được biên tập.</p>
+    </div>
+    <div class="action-buttons">
+      <a *ngIf="authService.currentUser()" class="secondary-button" [routerLink]="['/posts/mine']">Bài viết của tôi</a>
+      <a *ngIf="authService.currentUser()" class="primary-button" [routerLink]="['/posts/create']">Viết bài mới</a>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="loading">Đang tải bài viết...</div>
+  <div *ngIf="!loading() && error()" class="error-message">{{ error() }}</div>
+
+  <div *ngIf="!loading() && !error()" class="articles-grid">
+    <article *ngFor="let post of posts()" class="article-card">
+      <a class="article-link" [routerLink]="['/posts', post.id]"></a>
+      <div *ngIf="post.image" class="article-media">
+        <img [src]="post.image.startsWith('http') ? post.image : 'http://localhost:3000' + post.image" [alt]="post.title" />
+      </div>
+      <div class="article-body">
+        <div class="article-meta">
+          <span>{{ post.author_name || 'Ẩn danh' }}</span>
+          <span>{{ post.created_at ? (post.created_at | date:'dd/MM/yyyy') : '-' }}</span>
+        </div>
+        <h2>{{ post.title }}</h2>
+        <p class="article-excerpt">
+          {{ post.content ? (post.content | slice:0:180) + (post.content.length > 180 ? '...' : '') : 'Bài viết chưa có nội dung.' }}
+        </p>
+        <div class="article-footer">
+          <a class="view-button" [routerLink]="['/posts', post.id]">Đọc</a>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div *ngIf="!loading() && !error() && posts().length === 0" class="empty-state">
+    <p>Chưa có bài viết nào được duyệt.</p>
+  </div>
+</div>

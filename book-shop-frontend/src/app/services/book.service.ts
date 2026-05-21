@@ -23,7 +23,6 @@ export class BookService {
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     return new HttpHeaders({
-      'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     });
   }
@@ -51,12 +50,12 @@ export class BookService {
   }
 
   // ── POST /api/books ──
-  addBook(book: Partial<Book>): Observable<ApiResponse<Book>> {
+  addBook(book: Partial<Book> | FormData): Observable<ApiResponse<Book>> {
     return this.http.post<ApiResponse<Book>>(this.apiUrl, book, { headers: this.getHeaders() });
   }
 
   // ── PUT /api/books/:id ──
-  updateBook(id: number, book: Partial<Book>): Observable<ApiResponse<Book>> {
+  updateBook(id: number, book: Partial<Book> | FormData): Observable<ApiResponse<Book>> {
     return this.http.put<ApiResponse<Book>>(`${this.apiUrl}/${id}`, book, { headers: this.getHeaders() });
   }
 

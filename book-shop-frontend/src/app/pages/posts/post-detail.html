@@ -1,0 +1,38 @@
+<div class="post-detail">
+  <div class="toolbar">
+    <a pButton type="button" class="back-button" [routerLink]="['/posts']">← Quay lại</a>
+  </div>
+
+  <div *ngIf="loading()" class="loading">Đang tải bài viết...</div>
+  <div *ngIf="!loading() && error()" class="error-message">{{ error() }}</div>
+
+  <article *ngIf="post()" class="article-page">
+    <header class="article-header">
+      <div class="article-badge">Bài viết</div>
+      <h1>{{ post().title }}</h1>
+      <div class="article-meta">
+        <span>{{ post().author_name || 'Ẩn danh' }}</span>
+        <span>{{ post().created_at ? (post().created_at | date:'EEEE, dd MMMM yyyy') : '-' }}</span>
+      </div>
+    </header>
+
+    <div *ngIf="post().image" class="hero-image">
+      <img [src]="getImageUrl(post().image)" alt="Ảnh bài viết" />
+    </div>
+
+    <section class="article-content">
+      <p>{{ post().content || 'Bài viết không có nội dung.' }}</p>
+    </section>
+
+    <aside class="article-side">
+      <div class="related-box" *ngIf="post().books?.length">
+        <h3>Sách liên quan</h3>
+        <ul>
+          <li *ngFor="let book of post().books">
+            <a [routerLink]="['/detail', book.id]">{{ book.title }}</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </article>
+</div>

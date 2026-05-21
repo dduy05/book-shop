@@ -1,4 +1,20 @@
 const pool = require('../config/db');
+const fs = require('fs');
+const path = require('path');
+
+const getUploadedImageUrl = (req, filename) => {
+  if (!filename) return null;
+  return `${req.protocol}://${req.get('host')}/uploads/${filename}`;
+};
+
+const getStoragePathFromImage = (imageUrl) => {
+  if (!imageUrl) return null;
+  const uploadSegment = '/uploads/';
+  const idx = imageUrl.indexOf(uploadSegment);
+  if (idx === -1) return null;
+  const fileName = imageUrl.slice(idx + uploadSegment.length);
+  return path.join(__dirname, '..', '..', 'public', 'uploads', fileName);
+};
 
 // GET /api/books — Lấy toàn bộ danh sách sách
 const getAllBooks = async (req, res) => {
@@ -46,21 +62,24 @@ const getBookById = async (req, res) => {
 const createBook = async (req, res) => {
   try {
     const { title, author, category_id, price, quantity, image, description } = req.body;
+    const parsedCategoryId = category_id ? parseInt(category_id, 10) : null;
+    const parsedPrice = price !== undefined ? parseFloat(price) : null;
+    const parsedQuantity = quantity !== undefined && quantity !== null ? parseInt(quantity, 10) : 0;
+    const uploadedImage = req.file ? getUploadedImageUrl(req, req.file.filename) : image || null;
 
-    if (!title || !author || !price) {
+    if (!title || !author || !parsedPrice) {
       return res.status(400).json({
         status: 'error',
         message: 'Các trường title, author, price là bắt buộc'
       });
     }
 
-    const bookQuantity = quantity ?? 0;
     const sql = `
       INSERT INTO books (title, author, category_id, price, quantity, image, description)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `;
-    const result = await pool.query(sql, [title, author, category_id, price, bookQuantity, image, description]);
+    const result = await pool.query(sql, [title, author, parsedCategoryId, parsedPrice, parsedQuantity, uploadedImage, description]);
 
     res.status(201).json({ status: 'success', data: result.rows[0] });
   } catch (err) {
@@ -74,15 +93,31 @@ const updateBook = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, author, category_id, price, quantity, image, description } = req.body;
+    const parsedCategoryId = category_id ? parseInt(category_id, 10) : null;
+    const parsedPrice = price !== undefined ? parseFloat(price) : null;
+    const parsedQuantity = quantity !== undefined && quantity !== null ? parseInt(quantity, 10) : 0;
+    const newImage = req.file ? getUploadedImageUrl(req, req.file.filename) : image || null;
 
-    const bookQuantity = quantity ?? 0;
+    const currentResult = await pool.query('SELECT image FROM books WHERE id = $1', [id]);
+    if (currentResult.rowCount === 0) {
+      return res.status(404).json({ status: 'error', message: `Không tìm thấy sách với id = ${id}` });
+    }
+
+    const previousImage = currentResult.rows[0].image;
+    if (req.file && previousImage) {
+      const previousPath = getStoragePathFromImage(previousImage);
+      if (previousPath && fs.existsSync(previousPath)) {
+        fs.unlinkSync(previousPath);
+      }
+    }
+
     const sql = `
       UPDATE books
       SET title = $1, author = $2, category_id = $3, price = $4, quantity = $5, image = $6, description = $7
       WHERE id = $8
       RETURNING *
     `;
-    const result = await pool.query(sql, [title, author, category_id, price, bookQuantity, image, description, id]);
+    const result = await pool.query(sql, [title, author, parsedCategoryId, parsedPrice, parsedQuantity, newImage, description, id]);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ status: 'error', message: `Không tìm thấy sách với id = ${id}` });

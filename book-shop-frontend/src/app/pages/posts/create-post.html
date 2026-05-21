@@ -1,0 +1,29 @@
+<div class="post-form">
+  <h2>{{ editing ? 'Chỉnh sửa bài viết' : 'Tạo bài viết mới' }}</h2>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="field">
+      <label>Tiêu đề</label>
+      <input pInputText formControlName="title" [ngClass]="{invalid: form.get('title')?.invalid && form.get('title')?.touched}" />
+      <small class="error" *ngIf="form.get('title')?.invalid && form.get('title')?.touched">Tiêu đề không được để trống</small>
+    </div>
+    <div class="field">
+      <label>Nội dung</label>
+      <textarea formControlName="content" rows="6"></textarea>
+    </div>
+    <div class="field">
+      <label>Ảnh bài viết</label>
+      <input type="file" (change)="onFileChange($event)" accept="image/*" />
+      <div class="image-preview" *ngIf="imagePreview">
+        <img [src]="imagePreview" alt="Preview ảnh bài viết" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Đính kèm sách</label>
+      <p-multiSelect [options]="books" optionLabel="title" optionValue="id" formControlName="book_ids"></p-multiSelect>
+    </div>
+    <div class="actions">
+      <button pButton type="submit" [label]="editing ? 'Cập nhật và gửi lại' : 'Gửi lên duyệt'"></button>
+    </div>
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  </form>
+</div>

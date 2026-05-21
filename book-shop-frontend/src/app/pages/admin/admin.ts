@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 // PrimeNG Modules
 import { TableModule } from 'primeng/table';
@@ -16,6 +17,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 
 // PrimeNG Services
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { PostService } from '../../services/post.service';
 
 // App
 import { BookService } from '../../services/book.service';
@@ -54,15 +56,26 @@ export class AdminComponent implements OnInit {
   private fb = inject(FormBuilder);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
+  private postService = inject(PostService);
+  private router = inject(Router);
 
   books = signal<Book[]>([]);
   categories = signal<Category[]>([]);
   users = signal<User[]>([]);
   orders = signal<Order[]>([]);
   loading = signal(true);
-  activeTab: 'books' | 'users' | 'orders' = 'books';
+  // Thêm tab 'posts' để quản lý bài viết
+  activeTab: 'books' | 'users' | 'orders' | 'posts' = 'books';
 
-  setActiveTab(tab: 'books' | 'users' | 'orders'): void {
+  // Posts management
+  posts = signal<any[]>([]);
+  postRejectDialogVisible = false;
+  rejectingPost: any = null;
+  rejectReason = '';
+  postDetailDialogVisible = false;
+  selectedPost: any = null;
+
+  setActiveTab(tab: 'books' | 'users' | 'orders' | 'posts'): void {
     this.activeTab = tab;
   }
 
@@ -91,6 +104,9 @@ export class AdminComponent implements OnInit {
     description: [''],
   });
 
+  selectedBookImageFile: File | null = null;
+  bookImagePreview: string | null = null;
+
   // Category Form
   categoryForm: FormGroup = this.fb.group({
     name:        ['', [Validators.required, Validators.minLength(2)]],
@@ -115,6 +131,69 @@ export class AdminComponent implements OnInit {
     this.loadCategories();
     this.loadUsers();
     this.loadOrders();
+    this.loadPosts();
+  }
+
+  // ── Posts ──
+  loadPosts(): void {
+    this.postService.getAllAdmin().subscribe({ next: (data) => this.posts.set(data), error: (err) => console.error('Lỗi tải posts:', err) });
+  }
+
+  onApprovePost(post: any): void {
+    this.postService.approvePost(post.id).subscribe({ next: () => this.loadPosts(), error: (e) => { console.error(e); } });
+  }
+
+  onOpenReject(post: any): void {
+    this.rejectingPost = post;
+    this.rejectReason = '';
+    this.postRejectDialogVisible = true;
+  }
+
+  onRejectPostConfirm(): void {
+    if (!this.rejectReason) { alert('Cần nhập lý do từ chối'); return; }
+    this.postService.rejectPost(this.rejectingPost.id, this.rejectReason).subscribe({ next: () => { this.postRejectDialogVisible = false; this.loadPosts(); }, error: (e) => console.error(e) });
+  }
+
+  onDeletePost(post: any): void {
+    this.confirmationService.confirm({
+      message: `Bạn có chắc muốn xóa bài viết "${post.title}"?`,
+      header: 'Xác nhận xóa',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.postService.deletePost(post.id).subscribe({ next: () => this.loadPosts(), error: (e) => console.error(e) });
+      }
+    });
+  }
+
+  onViewPost(post: any): void {
+    if (post.status !== 'approved') {
+      this.selectedPost = post;
+      this.postDetailDialogVisible = true;
+      return;
+    }
+
+    this.router.navigate(['/posts', post.id]);
+  }
+
+  closePostDetail(): void {
+    this.postDetailDialogVisible = false;
+    this.selectedPost = null;
+  }
+
+  getImageUrl(image: string | null | undefined): string {
+    if (!image) {
+      return '';
+    }
+    return image.startsWith('http') ? image : `http://localhost:3000${image}`;
+  }
+
+  getStatusSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' {
+    switch ((status || '').toLowerCase()) {
+      case 'approved': return 'success';
+      case 'rejected': return 'danger';
+      case 'pending': return 'warn';
+      default: return 'info';
+    }
   }
 
   loadBooks(): void {
@@ -153,6 +232,8 @@ export class AdminComponent implements OnInit {
   onAddNew(): void {
     this.isEditMode = false;
     this.editingBookId = null;
+    this.selectedBookImageFile = null;
+    this.bookImagePreview = null;
     this.bookForm.reset({ price: 0, quantity: 0 });
     this.dialogVisible = true;
   }
@@ -161,6 +242,8 @@ export class AdminComponent implements OnInit {
   onEdit(book: Book): void {
     this.isEditMode = true;
     this.editingBookId = book.id;
+    this.selectedBookImageFile = null;
+    this.bookImagePreview = this.getImageUrl(book.image);
     this.bookForm.patchValue({
       title:       book.title,
       author:      book.author,
@@ -182,9 +265,23 @@ export class AdminComponent implements OnInit {
 
     const formValue = this.bookForm.value;
 
+    const payload = new FormData();
+    const hasUploadedImage = !!this.selectedBookImageFile;
+
+    if (hasUploadedImage) {
+      Object.entries(formValue).forEach(([key, value]) => {
+        if (key !== 'image') {
+          payload.append(key, String(value ?? ''));
+        }
+      });
+      payload.append('image', this.selectedBookImageFile as File);
+    }
+
+    const body = hasUploadedImage ? payload : formValue;
+
     if (this.isEditMode && this.editingBookId !== null) {
       // Gọi API PUT để cập nhật
-      this.bookService.updateBook(this.editingBookId, formValue).subscribe({
+      this.bookService.updateBook(this.editingBookId, body).subscribe({
         next: () => {
           this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Cập nhật sách thành công!' });
           this.loadBooks(); // Reload danh sách
@@ -197,7 +294,7 @@ export class AdminComponent implements OnInit {
       });
     } else {
       // Gọi API POST để thêm mới
-      this.bookService.addBook(formValue).subscribe({
+      this.bookService.addBook(body).subscribe({
         next: () => {
           this.messageService.add({ severity: 'success', summary: 'Thành công', detail: 'Thêm sách mới thành công!' });
           this.loadBooks(); // Reload danh sách
@@ -239,6 +336,19 @@ export class AdminComponent implements OnInit {
   // ── Hủy dialog ──
   onCancel(): void {
     this.dialogVisible = false;
+    this.selectedBookImageFile = null;
+    this.bookImagePreview = null;
+  }
+
+  onBookImageChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      this.selectedBookImageFile = null;
+      return;
+    }
+
+    this.selectedBookImageFile = input.files[0];
+    this.bookImagePreview = URL.createObjectURL(this.selectedBookImageFile);
   }
 
   // ── Helper kiểm tra lỗi form ──
