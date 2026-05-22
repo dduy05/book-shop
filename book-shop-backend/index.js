@@ -13,6 +13,7 @@ const userRoutes = require('./src/routes/userRoutes');
 const postRoutes = require('./src/routes/postRoutes');
 const couponRoutes = require('./src/routes/couponRoutes');
 const chatbotGetBooksRoutes = require('./chatbot/get_books');
+const chatbotGetCouponsRoutes = require('./chatbot/get_coupons');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -62,6 +63,7 @@ app.use('/api/posts', postRoutes);
 
 // Routes chatbot - lấy danh sách sách
 app.use('/chatbot/get_books', chatbotGetBooksRoutes);
+app.use('/chatbot/get_coupons', chatbotGetCouponsRoutes);
 
 // ── 404 Handler ─────────────────────────────────────────
 app.use((req, res) => {
