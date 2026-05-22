@@ -18,6 +18,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 // PrimeNG Services
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { PostService } from '../../services/post.service';
+import { CouponService, Coupon } from '../../services/coupon.service';
 
 // App
 import { BookService } from '../../services/book.service';
@@ -53,6 +54,7 @@ export class AdminComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private userService = inject(UserService);
   private orderService = inject(OrderService);
+  private couponService = inject(CouponService);
   private fb = inject(FormBuilder);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
@@ -63,9 +65,10 @@ export class AdminComponent implements OnInit {
   categories = signal<Category[]>([]);
   users = signal<User[]>([]);
   orders = signal<Order[]>([]);
+  coupons = signal<Coupon[]>([]);
   loading = signal(true);
   // Thêm tab 'posts' để quản lý bài viết
-  activeTab: 'books' | 'users' | 'orders' | 'posts' = 'books';
+  activeTab: 'books' | 'users' | 'orders' | 'posts' | 'coupons' = 'books';
 
   // Posts management
   posts = signal<any[]>([]);
@@ -75,7 +78,7 @@ export class AdminComponent implements OnInit {
   postDetailDialogVisible = false;
   selectedPost: any = null;
 
-  setActiveTab(tab: 'books' | 'users' | 'orders' | 'posts'): void {
+  setActiveTab(tab: 'books' | 'users' | 'orders' | 'posts' | 'coupons'): void {
     this.activeTab = tab;
   }
 
@@ -120,6 +123,19 @@ export class AdminComponent implements OnInit {
     description: [''],
   });
 
+  // Coupon Form
+  couponForm: FormGroup = this.fb.group({
+    code: ['',[Validators.required, Validators.minLength(2)]],
+    discount_amount: [0, [Validators.required, Validators.min(0)]],
+    remaining_quantity: [0, [Validators.required, Validators.min(0)]],
+    min_order_amount: [0, [Validators.required, Validators.min(0)]],
+    description: ['']
+  });
+
+  selectedCouponId: number | null = null;
+  couponDialogVisible = false;
+  isEditCouponMode = false;
+
   // Dropdown options
   userRoleOptions = [
     { label: 'User', value: 'USER' },
@@ -138,6 +154,7 @@ export class AdminComponent implements OnInit {
     this.loadCategories();
     this.loadUsers();
     this.loadOrders();
+    this.loadCoupons();
     this.loadPosts();
   }
 
@@ -233,9 +250,87 @@ export class AdminComponent implements OnInit {
       next: (data) => this.orders.set(data.map(order => ({
         ...order,
         status: (typeof order.status === 'string' ? order.status.toUpperCase() : order.status) as Order['status']
-      }))),
+      })) ),
       error: (err) => console.error('Lỗi khi tải orders:', err)
     });
+  }
+
+  loadCoupons(): void {
+    this.couponService.getAllCoupons().subscribe({
+      next: (data) => this.coupons.set(data),
+      error: (err) => console.error('Lỗi khi tải coupons:', err)
+    });
+  }
+
+  onAddCoupon(): void {
+    this.isEditCouponMode = false;
+    this.selectedCouponId = null;
+    this.couponForm.reset({ code: '', discount_amount: 0, remaining_quantity: 0, min_order_amount: 0, description: '' });
+    this.couponDialogVisible = true;
+  }
+
+  onEditCoupon(coupon: Coupon): void {
+    this.isEditCouponMode = true;
+    this.selectedCouponId = coupon.id;
+    this.couponForm.patchValue({
+      code: coupon.code,
+      discount_amount: coupon.discount_amount,
+      remaining_quantity: coupon.remaining_quantity,
+      min_order_amount: coupon.min_order_amount,
+      description: coupon.description || ''
+    });
+    this.couponDialogVisible = true;
+  }
+
+  onSaveCoupon(): void {
+    if (this.couponForm.invalid) {
+      this.couponForm.markAllAsTouched();
+      return;
+    }
+
+    const payload = this.couponForm.value;
+    const action = this.isEditCouponMode && this.selectedCouponId !== null
+      ? this.couponService.updateCoupon(this.selectedCouponId, payload)
+      : this.couponService.createCoupon(payload);
+
+    action.subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Thành công', detail: this.isEditCouponMode ? 'Cập nhật mã giảm giá thành công!' : 'Thêm mã giảm giá mới thành công!' });
+        this.loadCoupons();
+        this.couponDialogVisible = false;
+      },
+      error: (err) => {
+        console.error('Lỗi lưu coupon:', err);
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: err.error?.message || 'Không thể lưu mã giảm giá' });
+      }
+    });
+  }
+
+  onDeleteCoupon(coupon: Coupon): void {
+    this.confirmationService.confirm({
+      message: `Bạn có chắc muốn xóa mã giảm giá "<strong>${coupon.code}</strong>"?`,
+      header: 'Xác nhận xóa',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Xóa',
+      rejectLabel: 'Hủy',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.couponService.deleteCoupon(coupon.id).subscribe({
+          next: () => {
+            this.messageService.add({ severity: 'warn', summary: 'Đã xóa', detail: `Đã xóa mã ${coupon.code}` });
+            this.loadCoupons();
+          },
+          error: (err) => {
+            console.error('Lỗi xóa coupon:', err);
+            this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể xóa mã giảm giá' });
+          }
+        });
+      }
+    });
+  }
+
+  onCancelCoupon(): void {
+    this.couponDialogVisible = false;
   }
 
   // ── Mở dialog Thêm mới ──
@@ -692,6 +787,10 @@ export class AdminComponent implements OnInit {
 
   getOrderItems(order: Order | null): OrderItem[] {
     return order ? (order.items ?? order.order_details ?? []) : [];
+  }
+
+  getOrderCoupons(order: Order | null) {
+    return order?.coupons ?? [];
   }
 
   // ── Helper Methods ──

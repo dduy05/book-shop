@@ -43,30 +43,46 @@ const getOrderById = async (req, res) => {
     const userId = req.user.id;
 
     const queryParams = [id];
-  let whereClause = 'WHERE o.id = $1';
+    let whereClause = 'WHERE o.id = $1';
 
-  if (req.user.role !== 'ADMIN') {
-    whereClause += ' AND o.user_id = $2';
-    queryParams.push(userId);
-  }
+    if (req.user.role !== 'ADMIN') {
+      whereClause += ' AND o.user_id = $2';
+      queryParams.push(userId);
+    }
 
-  const result = await pool.query(`
-      SELECT o.*, UPPER(o.status) AS status, json_agg(
-        json_build_object(
-          'id', od.id,
-          'book_id', od.book_id,
-          'quantity', od.quantity,
-          'price', od.price,
-          'book_title', b.title,
-          'book_author', b.author,
-          'book_image', b.image
-        )
-      ) as items
+    const result = await pool.query(`
+      SELECT o.*, UPPER(o.status) AS status,
+        u.name AS user_name,
+        u.email AS user_email,
+        (
+          SELECT json_agg(json_build_object(
+            'id', od.id,
+            'book_id', od.book_id,
+            'quantity', od.quantity,
+            'price', od.price,
+            'book_title', b.title,
+            'book_author', b.author,
+            'book_image', b.image
+          ))
+          FROM order_details od
+          LEFT JOIN books b ON od.book_id = b.id
+          WHERE od.order_id = o.id
+        ) AS items,
+        (
+          SELECT json_agg(json_build_object(
+            'id', oc.id,
+            'coupon_id', oc.coupon_id,
+            'code', oc.code,
+            'applied_discount_amount', oc.discount_amount,
+            'coupon_discount_amount', c.discount_amount
+          ))
+          FROM order_coupons oc
+          LEFT JOIN coupons c ON oc.coupon_id = c.id
+          WHERE oc.order_id = o.id
+        ) AS coupons
       FROM orders o
-      LEFT JOIN order_details od ON o.id = od.order_id
-      LEFT JOIN books b ON od.book_id = b.id
+      LEFT JOIN users u ON o.user_id = u.id
       ${whereClause}
-      GROUP BY o.id
     `, queryParams);
 
     if (result.rowCount === 0) {
@@ -87,8 +103,8 @@ const createOrder = async (req, res) => {
   try {
     await client.query('BEGIN');
 
-      const userId = req.user.id;
-    const { shipping_address, payment_method } = req.body;
+    const userId = req.user.id;
+    const { shipping_address, payment_method, coupon_codes = [] } = req.body;
 
     const cartResult = await client.query(
       'SELECT book_id AS id, quantity FROM carts WHERE user_id = $1',
@@ -126,21 +142,69 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Tạo đơn hàng
+    const appliedCouponCodes = Array.isArray(coupon_codes)
+      ? [...new Set(coupon_codes.map((code) => String(code).trim().toUpperCase()).filter(Boolean))]
+      : [];
+
+    let discountAmount = 0;
+    const appliedCoupons = [];
+
+    for (const code of appliedCouponCodes) {
+      const couponResult = await client.query('SELECT * FROM coupons WHERE code = $1', [code]);
+      if (couponResult.rowCount === 0) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ status: 'error', message: `Mã giảm giá ${code} không tồn tại` });
+      }
+
+      const coupon = couponResult.rows[0];
+      if (coupon.remaining_quantity <= 0) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ status: 'error', message: `Mã giảm giá ${code} đã hết lượt sử dụng` });
+      }
+
+      if (totalAmount < coupon.min_order_amount) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({
+          status: 'error',
+          message: `Mã ${code} chỉ áp dụng cho đơn từ ${coupon.min_order_amount.toLocaleString('vi-VN')} VND trở lên`
+        });
+      }
+
+      const remainingAmount = Math.max(0, totalAmount - discountAmount);
+      const appliedAmount = Math.min(coupon.discount_amount, remainingAmount);
+      discountAmount += appliedAmount;
+      appliedCoupons.push({ coupon, appliedAmount });
+    }
+
+    const finalAmount = Math.max(0, totalAmount - discountAmount);
+
     const orderResult = await client.query(`
-      INSERT INTO orders (user_id, total_amount, status, shipping_address, payment_method)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO orders (user_id, original_amount, discount_amount, total_amount, status, shipping_address, payment_method)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
-    `, [userId, totalAmount, 'PENDING', shipping_address, payment_method]);
+    `, [userId, totalAmount, discountAmount, finalAmount, 'PENDING', shipping_address, payment_method]);
 
     const orderId = orderResult.rows[0].id;
 
-    // Thêm chi tiết đơn hàng (số lượng đã được giảm khi thêm vào giỏ hàng)
     for (const item of orderItems) {
       await client.query(`
         INSERT INTO order_details (order_id, book_id, quantity, price)
         VALUES ($1, $2, $3, $4)
       `, [orderId, item.book_id, item.quantity, item.price]);
+    }
+
+    for (const applied of appliedCoupons) {
+      await client.query(`
+        INSERT INTO order_coupons (order_id, coupon_id, code, discount_amount)
+        VALUES ($1, $2, $3, $4)
+      `, [orderId, applied.coupon.id, applied.coupon.code, applied.appliedAmount]);
+
+      await client.query(`
+        UPDATE coupons
+        SET remaining_quantity = remaining_quantity - 1,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $1
+      `, [applied.coupon.id]);
     }
 
     await client.query('DELETE FROM carts WHERE user_id = $1', [userId]);

@@ -20,6 +20,7 @@
     <button type="button" class="tab-button" [class.active]="activeTab==='books'" (click)="setActiveTab('books')">📚 Quản lý sách</button>
     <button type="button" class="tab-button" [class.active]="activeTab==='users'" (click)="setActiveTab('users')">👥 Quản lý người dùng</button>
     <button type="button" class="tab-button" [class.active]="activeTab==='orders'" (click)="setActiveTab('orders')">📦 Quản lý đơn hàng</button>
+    <button type="button" class="tab-button" [class.active]="activeTab==='coupons'" (click)="setActiveTab('coupons')">🏷️ Quản lý mã giảm giá</button>
     <button type="button" class="tab-button" [class.active]="activeTab==='posts'" (click)="setActiveTab('posts')">📝 Quản lý bài viết</button>
   </div>
 
@@ -201,6 +202,120 @@
             </ng-template>
           </p-table>
         </div>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         TAB QUẢN LÝ MÃ GIẢM GIÁ
+    ══════════════════════════════════════ -->
+    <section *ngIf="activeTab === 'coupons'" class="tab-content">
+      <div class="admin-header">
+        <div class="admin-header-left">
+          <div class="admin-icon">🏷️</div>
+          <div>
+            <h1 class="admin-title">Quản lý mã giảm giá</h1>
+            <p class="admin-subtitle">Tạo, sửa, xóa mã giảm giá và thiết lập điều kiện áp dụng.</p>
+          </div>
+        </div>
+        <p-button label="Thêm mã giảm giá" icon="pi pi-plus" severity="success" (onClick)="onAddCoupon()" styleClass="btn-add" />
+      </div>
+
+      <div class="table-card">
+        <p-table
+          [value]="coupons()"
+          [paginator]="true"
+          [rows]="10"
+          [rowsPerPageOptions]="[5, 10, 20]"
+          [tableStyle]="{ 'min-width': '60rem' }"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Hiển thị {first} – {last} / tổng {totalRecords} mã giảm giá"
+          stripedRows
+        >
+          <ng-template #caption>
+            <div class="table-caption">
+              <span>Tổng cộng: <strong>{{ coupons().length }}</strong> mã giảm giá</span>
+            </div>
+          </ng-template>
+
+          <ng-template #header>
+            <tr>
+              <th style="width:80px; text-align:center">ID</th>
+              <th pSortableColumn="code">Mã <p-sortIcon field="code" /></th>
+              <th pSortableColumn="discount_amount" style="width:140px">Giảm <p-sortIcon field="discount_amount" /></th>
+              <th pSortableColumn="remaining_quantity" style="width:140px">Số lượng <p-sortIcon field="remaining_quantity" /></th>
+              <th pSortableColumn="min_order_amount" style="width:160px">Đơn tối thiểu <p-sortIcon field="min_order_amount" /></th>
+              <th>Mô tả</th>
+              <th style="width:160px; text-align:center">Thao tác</th>
+            </tr>
+          </ng-template>
+
+          <ng-template #body let-coupon>
+            <tr>
+              <td class="col-id">{{ coupon.id }}</td>
+              <td>{{ coupon.code }}</td>
+              <td>{{ coupon.discount_amount | currency:'VND':'symbol':'1.0-0' }}</td>
+              <td style="text-align:center">{{ coupon.remaining_quantity }}</td>
+              <td>{{ coupon.min_order_amount | currency:'VND':'symbol':'1.0-0' }}</td>
+              <td>{{ coupon.description || 'Không có' }}</td>
+              <td class="col-actions">
+                <p-button icon="pi pi-pencil" [rounded]="true" severity="warn" pTooltip="Sửa" tooltipPosition="top" (onClick)="onEditCoupon(coupon)" class="btn-edit" />
+                <p-button icon="pi pi-trash" [rounded]="true" severity="danger" pTooltip="Xóa" tooltipPosition="top" (onClick)="onDeleteCoupon(coupon)" class="btn-delete" />
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="7" class="empty-cell">
+                <div class="empty-box">
+                  <span style="font-size:2.5rem">🏷️</span>
+                  <p>Chưa có mã giảm giá nào.</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+
+      <p-dialog
+        header="{{ isEditCouponMode ? 'Cập nhật mã giảm giá' : 'Thêm mã giảm giá mới' }}"
+        [(visible)]="couponDialogVisible"
+        [modal]="true"
+        [closable]="true"
+        [style]="{ width: '520px' }"
+      >
+        <form [formGroup]="couponForm" class="coupon-form">
+          <div class="form-field">
+            <label for="code">Mã giảm giá <span class="required">*</span></label>
+            <input id="code" pInputText formControlName="code" placeholder="Nhập mã giảm giá" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label for="discount_amount">Số tiền giảm (VND) <span class="required">*</span></label>
+              <p-inputNumber id="discount_amount" formControlName="discount_amount" mode="currency" currency="VND" locale="vi-VN" [min]="0" [useGrouping]="true" />
+            </div>
+            <div class="form-field">
+              <label for="remaining_quantity">Số lượng vé <span class="required">*</span></label>
+              <p-inputNumber id="remaining_quantity" formControlName="remaining_quantity" [min]="0" [useGrouping]="true" />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="min_order_amount">Đơn tối thiểu (VND) <span class="required">*</span></label>
+            <p-inputNumber id="min_order_amount" formControlName="min_order_amount" mode="currency" currency="VND" locale="vi-VN" [min]="0" [useGrouping]="true" />
+          </div>
+
+          <div class="form-field">
+            <label for="description">Mô tả</label>
+            <textarea id="description" pInputText formControlName="description" rows="3" placeholder="Ghi chú cho mã giảm giá"></textarea>
+          </div>
+        </form>
+
+        <ng-template pTemplate="footer">
+          <p-button label="Hủy" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="onCancelCoupon()"></p-button>
+          <p-button label="Lưu" icon="pi pi-check" (onClick)="onSaveCoupon()"></p-button>
+        </ng-template>
+      </p-dialog>
     </section>
 
     <!-- ══════════════════════════════════════
@@ -482,7 +597,20 @@
           <h4>Thông tin thanh toán</h4>
           <p><strong>Địa chỉ giao:</strong> {{ selectedOrder.shipping_address || 'Chưa có' }}</p>
           <p><strong>Phương thức:</strong> {{ selectedOrder.payment_method || 'Chưa có' }}</p>
-          <p><strong>Tổng tiền:</strong> {{ formatCurrency(selectedOrder.total_amount) }}</p>
+          <p><strong>Tổng gốc:</strong> {{ formatCurrency(selectedOrder.original_amount ?? selectedOrder.total_amount) }}</p>
+          <p><strong>Giảm giá:</strong> {{ formatCurrency(selectedOrder.discount_amount ?? 0) }}</p>
+          <p><strong>Tổng sau giảm:</strong> {{ formatCurrency(selectedOrder.total_amount) }}</p>
+          <div class="coupon-summary" *ngIf="getOrderCoupons(selectedOrder).length > 0; else noCoupon">
+            <p><strong>Mã giảm giá:</strong></p>
+            <ul>
+              <li *ngFor="let coupon of getOrderCoupons(selectedOrder)">
+                <strong>{{ coupon.code }}</strong> — Giảm {{ formatCurrency(coupon.coupon_discount_amount ?? coupon.discount_amount) }}
+              </li>
+            </ul>
+          </div>
+          <ng-template #noCoupon>
+            <p><strong>Mã giảm giá:</strong> Không sử dụng</p>
+          </ng-template>
         </div>
       </div>
 

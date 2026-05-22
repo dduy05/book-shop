@@ -21,9 +21,20 @@ export interface OrderItem {
   book_image?: string;
 }
 
+export interface OrderCoupon {
+  id: number;
+  coupon_id: number;
+  code: string;
+  discount_amount: number;
+  applied_discount_amount?: number;
+  coupon_discount_amount?: number;
+}
+
 export interface Order {
   id: number;
   user_id: number;
+  original_amount?: number;
+  discount_amount?: number;
   total_amount: number;
   status: 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
   shipping_address?: string;
@@ -32,6 +43,7 @@ export interface Order {
   updated_at: string;
   items?: OrderItem[];
   order_details?: OrderItem[];
+  coupons?: OrderCoupon[];
   user_name?: string; // For admin view
   user_email?: string; // For admin view
 }
@@ -43,6 +55,18 @@ export interface CreateOrderRequest {
     id: number;
     quantity: number;
   }>;
+  coupon_codes?: string[];
+}
+
+export interface ValidateCouponResponse {
+  id: number;
+  code: string;
+  discount_amount: number;
+  remaining_quantity: number;
+  min_order_amount: number;
+  description?: string;
+  applicable_discount: number;
+  discounted_total: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -80,6 +104,14 @@ export class OrderService {
     return this.http.post<ApiResponse<Order>>(this.apiUrl, orderData, { headers: this.getHeaders() }).pipe(
       map(res => res.data)
     );
+  }
+
+  // ── Xác thực mã giảm giá trước khi áp dụng ──
+  validateCoupon(code: string, orderTotal: number): Observable<ValidateCouponResponse> {
+    return this.http.post<ApiResponse<ValidateCouponResponse>>(`${this.apiUrl.replace('/orders', '/coupons')}/validate`,
+      { code, order_total: orderTotal },
+      { headers: this.getHeaders() }
+    ).pipe(map(res => res.data));
   }
 
   // ── Cập nhật trạng thái đơn hàng (admin only) ──
