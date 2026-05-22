@@ -12,7 +12,22 @@
     </div>
     <div class="field">
       <label>Ảnh bài viết</label>
-      <input type="file" (change)="onFileChange($event)" accept="image/*" />
+      <div class="image-source-options">
+        <label>
+          <input type="radio" name="imageSource" value="file" [checked]="imageSource === 'file'" (change)="setImageSource('file')" />
+          Tải ảnh từ máy
+        </label>
+        <label>
+          <input type="radio" name="imageSource" value="url" [checked]="imageSource === 'url'" (change)="setImageSource('url')" />
+          Gắn link ảnh
+        </label>
+      </div>
+      <div *ngIf="imageSource === 'file'" class="file-input">
+        <input type="file" (change)="onFileChange($event)" accept="image/*" />
+      </div>
+      <div *ngIf="imageSource === 'url'" class="url-input">
+        <input pInputText type="url" name="imageUrl" placeholder="Nhập URL ảnh" [(ngModel)]="imageUrl" [ngModelOptions]="{standalone: true}" (input)="onImageUrlInput()" />
+      </div>
       <div class="image-preview" *ngIf="imagePreview">
         <img [src]="imagePreview" alt="Preview ảnh bài viết" />
       </div>

@@ -1,5 +1,9 @@
 .post-form { max-width: 800px; margin: 1rem auto; }
 .field { margin-bottom: 1rem; display:flex; flex-direction:column; }
+.image-source-options { display:flex; gap: 1rem; flex-wrap: wrap; margin: 0.5rem 0; }
+.image-source-options label { display:flex; align-items:center; gap: 0.5rem; font-size: 0.95rem; }
+.file-input,
+.url-input { margin-top: 0.5rem; }
 .image-preview { margin-top: 0.75rem; max-width: 320px; }
 .image-preview img { width: 100%; border-radius: 1rem; object-fit: cover; }
 .actions { text-align: right; }

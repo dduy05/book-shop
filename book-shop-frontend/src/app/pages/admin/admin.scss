@@ -469,6 +469,24 @@
   color: #0f172a;
 }
 
+.image-source-options {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.radio-option input {
+  margin: 0;
+}
+
 .image-preview {
   margin-top: 8px;
 }

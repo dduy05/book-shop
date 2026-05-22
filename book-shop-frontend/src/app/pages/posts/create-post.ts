@@ -30,6 +30,16 @@ export class CreatePostComponent implements OnInit {
   imageFile: File | null = null;
   imagePreview = '';
   existingImage = '';
+  imageSource: 'file' | 'url' = 'file';
+  imageUrl = '';
+  private backendUrl = 'http://localhost:3000';
+
+  private getPreviewUrl(image: string): string {
+    if (!image) {
+      return '';
+    }
+    return image.startsWith('http') ? image : `${this.backendUrl}${image}`;
+  }
 
   ngOnInit(): void {
     this.bookService.getBooks().subscribe({ next: (data) => this.books = data, error: (e) => console.error(e) });
@@ -53,7 +63,18 @@ export class CreatePostComponent implements OnInit {
           return;
         }
         this.existingImage = post.image || '';
-        this.imagePreview = post.image || '';
+        if (post.image) {
+          this.imagePreview = post.image.startsWith('http') ? post.image : `${this.backendUrl}${post.image}`;
+        } else {
+          this.imagePreview = '';
+        }
+        if (post.image && post.image.startsWith('http')) {
+          this.imageSource = 'url';
+          this.imageUrl = post.image;
+        } else {
+          this.imageSource = 'file';
+          this.imageUrl = '';
+        }
         this.form.patchValue({ title: post.title, content: post.content, book_ids: (post.books || []).map((b: any) => b.id) });
       },
       error: (err) => {
@@ -61,6 +82,19 @@ export class CreatePostComponent implements OnInit {
         this.errorMessage = 'Không thể tải bài viết để sửa. Hãy thử lại sau.';
       }
     });
+  }
+
+  setImageSource(source: 'file' | 'url'): void {
+    this.imageSource = source;
+    if (source === 'file') {
+      this.imageUrl = '';
+      if (!this.imageFile) {
+        this.imagePreview = this.existingImage;
+      }
+    } else {
+      this.imageFile = null;
+      this.imagePreview = this.imageUrl || this.existingImage;
+    }
   }
 
   onFileChange(event: Event): void {
@@ -72,8 +106,15 @@ export class CreatePostComponent implements OnInit {
     }
 
     this.imageFile = input.files[0];
+    this.imageSource = 'file';
     this.existingImage = '';
     this.imagePreview = URL.createObjectURL(this.imageFile);
+  }
+
+  onImageUrlInput(): void {
+    this.imageSource = 'url';
+    this.imageFile = null;
+    this.imagePreview = this.imageUrl || this.existingImage;
   }
 
   onSubmit(): void {
@@ -85,7 +126,10 @@ export class CreatePostComponent implements OnInit {
     (this.form.get('book_ids')?.value || []).forEach((bookId: any) => formData.append('book_ids', bookId));
     if (this.imageFile) {
       formData.append('image', this.imageFile);
+    } else if (this.imageSource === 'url' && this.imageUrl) {
+      formData.append('imageUrl', this.imageUrl);
     }
+    formData.append('imageSource', this.imageSource);
 
     if (this.editing && this.postId !== null) {
       this.postService.updatePost(this.postId, formData).subscribe({

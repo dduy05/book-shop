@@ -647,7 +647,7 @@
       <div class="loading-order-detail">Đang tải chi tiết đơn hàng...</div>
     </ng-template>
 
-    <ng-template #footer>
+    <ng-template pTemplate="footer">
       <div class="dialog-footer">
         <p-button label="Đóng" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="orderDetailDialogVisible = false" />
       </div>
@@ -745,7 +745,7 @@
     </div>
 
     <!-- Chân dialog -->
-    <ng-template #footer>
+    <ng-template pTemplate="footer">
       <div class="dialog-footer">
         <p-button label="Đóng" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="importExcelDialogVisible = false" [disabled]="importing" />
         <p-button label="Tải lên và Nhập" icon="pi pi-upload" severity="success" (onClick)="onUploadExcel()" [disabled]="!selectedExcelFile || importing" />
@@ -822,10 +822,28 @@
 
       <!-- Ảnh bìa sách -->
       <div class="form-field">
-        <label for="image">Ảnh bìa sách</label>
+        <label>Ảnh bìa sách</label>
+        <div class="image-source-options">
+          <label class="radio-option">
+            <input type="radio" formControlName="imageSource" value="upload" />
+            Tải ảnh từ máy
+          </label>
+          <label class="radio-option">
+            <input type="radio" formControlName="imageSource" value="url" />
+            Gắn link ảnh
+          </label>
+        </div>
+      </div>
+
+      <div class="form-field" *ngIf="bookForm.get('imageSource')?.value === 'upload'">
         <input id="image" type="file" accept="image/*"
                (change)="onBookImageChange($event)"
                class="file-input" />
+      </div>
+
+      <div class="form-field" *ngIf="bookForm.get('imageSource')?.value === 'url'">
+        <label for="imageUrl">Link ảnh</label>
+        <input id="imageUrl" pInputText formControlName="imageUrl" placeholder="Nhập URL ảnh" (input)="onImageUrlChange($any($event.target).value)" />
       </div>
 
       <div class="form-field image-preview" *ngIf="bookImagePreview">
@@ -846,7 +864,7 @@
     </form>
 
     <!-- Chân dialog -->
-    <ng-template #footer>
+    <ng-template pTemplate="footer">
       <div class="dialog-footer">
         <p-button label="Hủy" icon="pi pi-times" severity="secondary"
                   [text]="true" (onClick)="onCancel()" />
@@ -891,7 +909,7 @@
     </form>
 
     <!-- Chân dialog -->
-    <ng-template #footer>
+    <ng-template pTemplate="footer">
       <div class="dialog-footer">
         <p-button label="Hủy" icon="pi pi-times" severity="secondary"
                   [text]="true" (onClick)="onCancelCategory()" />

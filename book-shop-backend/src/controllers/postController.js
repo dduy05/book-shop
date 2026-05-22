@@ -74,7 +74,9 @@ const createPost = async (req, res) => {
   try {
     const { title, content, book_ids } = req.body;
     const author_id = req.user.id;
-    const image = req.file ? `/uploads/${req.file.filename}` : null;
+    const rawImageUrl = req.body.imageUrl || req.body.image || '';
+    const imageUrl = rawImageUrl && rawImageUrl.toString().trim() ? rawImageUrl.toString().trim() : null;
+    const image = req.file ? `/uploads/${req.file.filename}` : imageUrl || null;
     const parsedBookIds = Array.isArray(book_ids)
       ? book_ids.map((id) => Number(id)).filter(Boolean)
       : book_ids ? [Number(book_ids)].filter(Boolean) : [];
@@ -152,8 +154,11 @@ const updatePost = async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Không thể chỉnh sửa bài viết đã được duyệt' });
     }
 
-    const newImage = req.file ? `/uploads/${req.file.filename}` : post.image;
-    if (req.file && post.image) {
+    const rawImageUrl = req.body.imageUrl || req.body.image || '';
+    const imageUrl = rawImageUrl && rawImageUrl.toString().trim() ? rawImageUrl.toString().trim() : null;
+    const newImage = req.file ? `/uploads/${req.file.filename}` : imageUrl ? imageUrl : post.image;
+    const shouldDeleteOldFile = post.image && !post.image.startsWith('http') && (req.file || imageUrl);
+    if (shouldDeleteOldFile) {
       const oldImagePath = path.join(__dirname, '..', '..', 'public', post.image.replace(/^\//, ''));
       fs.unlink(oldImagePath, (err) => {
         if (err) {

@@ -110,6 +110,8 @@ export class AdminComponent implements OnInit {
     price:       [0,  [Validators.required, Validators.min(1000)]],
     quantity:    [0,  [Validators.required, Validators.min(0)]],
     category_id: [null, [Validators.required]],
+    imageSource: ['upload'],
+    imageUrl:    [''],
     image:       [''],
     description: [''],
   });
@@ -339,7 +341,17 @@ export class AdminComponent implements OnInit {
     this.editingBookId = null;
     this.selectedBookImageFile = null;
     this.bookImagePreview = null;
-    this.bookForm.reset({ price: 0, quantity: 0 });
+    this.bookForm.reset({
+      title: '',
+      author: '',
+      price: 0,
+      quantity: 0,
+      category_id: null,
+      imageSource: 'upload',
+      imageUrl: '',
+      image: '',
+      description: ''
+    });
     this.dialogVisible = true;
   }
 
@@ -348,14 +360,17 @@ export class AdminComponent implements OnInit {
     this.isEditMode = true;
     this.editingBookId = book.id;
     this.selectedBookImageFile = null;
-    this.bookImagePreview = this.getImageUrl(book.image);
+    const currentImage = book.image || '';
+    this.bookImagePreview = this.getImageUrl(currentImage);
     this.bookForm.patchValue({
       title:       book.title,
       author:      book.author,
       price:       book.price,
       quantity:    book.quantity ?? 0,
       category_id: book.category_id,
-      image:       book.image,
+      imageSource: currentImage ? 'url' : 'upload',
+      imageUrl:    currentImage,
+      image:       currentImage,
       description: book.description,
     });
     this.dialogVisible = true;
@@ -369,20 +384,26 @@ export class AdminComponent implements OnInit {
     }
 
     const formValue = this.bookForm.value;
+    const imageSource = formValue.imageSource;
+    const imageUrl = formValue.imageUrl?.trim();
 
-    const payload = new FormData();
-    const hasUploadedImage = !!this.selectedBookImageFile;
+    const hasUploadedImage = imageSource === 'upload' && !!this.selectedBookImageFile;
 
+    let body: Partial<Book> | FormData;
     if (hasUploadedImage) {
+      body = new FormData();
       Object.entries(formValue).forEach(([key, value]) => {
-        if (key !== 'image') {
-          payload.append(key, String(value ?? ''));
+        if (key !== 'image' && key !== 'imageUrl' && key !== 'imageSource') {
+          (body as FormData).append(key, String(value ?? ''));
         }
       });
-      payload.append('image', this.selectedBookImageFile as File);
+      (body as FormData).append('image', this.selectedBookImageFile as File);
+    } else {
+      body = {
+        ...formValue,
+        image: imageSource === 'url' ? imageUrl : formValue.image,
+      };
     }
-
-    const body = hasUploadedImage ? payload : formValue;
 
     if (this.isEditMode && this.editingBookId !== null) {
       // Gọi API PUT để cập nhật
@@ -518,11 +539,19 @@ export class AdminComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) {
       this.selectedBookImageFile = null;
+      this.bookImagePreview = this.bookForm.value.imageUrl || null;
       return;
     }
 
     this.selectedBookImageFile = input.files[0];
+    this.bookForm.patchValue({ imageSource: 'upload', imageUrl: '' });
     this.bookImagePreview = URL.createObjectURL(this.selectedBookImageFile);
+  }
+
+  onImageUrlChange(value: string): void {
+    this.bookForm.patchValue({ imageSource: 'url', imageUrl: value });
+    this.selectedBookImageFile = null;
+    this.bookImagePreview = value || null;
   }
 
   // ── Helper kiểm tra lỗi form ──
