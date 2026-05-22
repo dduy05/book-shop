@@ -7,6 +7,7 @@ const bookRoutes = require('./src/routes/bookRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes');
 const wishlistRoutes = require('./src/routes/wishlistRoutes');
+const cartRoutes = require('./src/routes/cartRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const postRoutes = require('./src/routes/postRoutes');
@@ -42,6 +43,9 @@ app.use('/api/categories', categoryRoutes);
 
 // Routes wishlist
 app.use('/api/wishlist', wishlistRoutes);
+
+// Routes cart (giỏ hàng)
+app.use('/api/cart', cartRoutes);
 
 // Routes orders
 app.use('/api/orders', orderRoutes);

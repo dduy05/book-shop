@@ -39,36 +39,30 @@ export class CartComponent {
   }
 
   removeFromCart(bookId: number): void {
-    const removedItem = this.cartService.removeFromCart(bookId);
-    if (removedItem) {
-      // Hoàn lại số lượng sách trong database
-      this.bookService.updateBookQuantity(removedItem.id, removedItem.quantity, true).subscribe({
-        next: () => {
-          // Cập nhật quantity trong books signal nếu cần
-          // Có thể cần refresh books list hoặc update local
-        },
-        error: (err) => {
-          console.error('Lỗi khi hoàn lại số lượng sách:', err);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Lỗi',
-            detail: 'Không thể hoàn lại số lượng sách'
-          });
+    this.cartService.removeFromCartRemote(bookId).subscribe({
+      next: (removed) => {
+        if (removed) {
+          this.messageService.add({ severity: 'success', summary: 'OK', detail: 'Đã xóa khỏi giỏ hàng' });
+        } else {
+          this.messageService.add({ severity: 'warn', summary: 'Chú ý', detail: 'Không tìm thấy mục trong giỏ hàng' });
         }
-      });
-    }
+      },
+      error: (err) => {
+        console.error('Lỗi khi xóa khỏi giỏ hàng:', err);
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể xóa khỏi giỏ hàng' });
+      }
+    });
   }
 
   clearCart(): void {
-    const clearedItems = this.cartService.clearCart();
-    // Hoàn lại số lượng cho tất cả items
-    clearedItems.forEach(item => {
-      this.bookService.updateBookQuantity(item.id, item.quantity, true).subscribe({
-        next: () => {},
-        error: (err) => {
-          console.error('Lỗi khi hoàn lại số lượng sách:', err);
-        }
-      });
+    this.cartService.clearCartRemote().subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'OK', detail: 'Đã xóa toàn bộ giỏ hàng' });
+      },
+      error: (err) => {
+        console.error('Lỗi khi xóa toàn bộ giỏ hàng:', err);
+        this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể xóa giỏ hàng' });
+      }
     });
   }
 

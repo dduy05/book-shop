@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { CartService } from './cart.service';
 
 export interface User {
   id: number;
@@ -19,6 +20,7 @@ export class AuthService {
 
   currentUser = signal<User | null>(null);
   isLoginDialogOpen = signal<boolean>(false);
+  private cartService = inject(CartService);
 
   constructor() {
     // Phục hồi session từ localStorage nếu có (Tránh mất đăng nhập khi F5)
@@ -42,6 +44,7 @@ export class AuthService {
           localStorage.setItem('token', res.token); // Lưu chìa khóa bảo mật
           localStorage.setItem('currentUser', JSON.stringify(res.user)); // Lưu thông tin
           this.currentUser.set(res.user);
+          this.cartService.loadCart();
         }
       })
     );
@@ -78,6 +81,7 @@ export class AuthService {
   // ── Đăng xuất ──
   logout(): void {
     this.currentUser.set(null);
+    this.cartService.clearLocalCart();
     localStorage.removeItem('currentUser');
     localStorage.removeItem('token'); // Quét sạch cả token thật
   }

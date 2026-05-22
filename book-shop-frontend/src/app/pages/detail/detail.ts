@@ -93,21 +93,20 @@ export class DetailComponent implements OnInit {
       return;
     }
 
-    const newStock = available - qty;
-    this.bookService.updateBookQuantity(book.id, newStock).subscribe({
-      next: () => {
-        const added = this.cartService.addToCart(book, qty);
+    this.cartService.addToCartRemote(book, qty).subscribe({
+      next: (added) => {
         if (!added) {
           alert('Không thể thêm vào giỏ hàng do số lượng trong kho không đủ.');
           return;
         }
+        const newStock = available - qty;
         this.book.update(current => current ? { ...current, quantity: newStock } : current);
         this.quantity.set(newStock > 0 ? 1 : 0);
         console.log(`Đã thêm ${qty} cuốn "${book.title}" vào giỏ hàng`);
       },
       error: (err) => {
-        console.error('Lỗi cập nhật tồn kho:', err);
-        alert('Không thể cập nhật tồn kho. Vui lòng thử lại sau.');
+        console.error('Lỗi khi thêm vào giỏ hàng:', err);
+        alert('Không thể thêm vào giỏ hàng. Vui lòng thử lại sau.');
       }
     });
   }

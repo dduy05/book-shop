@@ -62,20 +62,20 @@ export class HomeComponent implements OnInit {
     }
 
     const newStock = available - 1;
-    this.bookService.updateBookQuantity(book.id, newStock).subscribe({
-      next: () => {
-        const added = this.cartService.addToCart(book, 1);
+    this.cartService.addToCartRemote(book, 1).subscribe({
+      next: (added) => {
         if (!added) {
           alert('Không thể thêm vào giỏ hàng: số lượng trong kho không đủ.');
           return;
         }
+        const newStock = available - 1;
         this.books.update(items => items.map(item =>
           item.id === book.id ? { ...item, quantity: newStock } : item
         ));
       },
       error: (err) => {
-        console.error('Lỗi cập nhật tồn kho:', err);
-        alert('Không thể cập nhật tồn kho. Vui lòng thử lại sau.');
+        console.error('Lỗi khi thêm vào giỏ hàng:', err);
+        alert('Không thể thêm vào giỏ hàng. Vui lòng thử lại sau.');
       }
     });
   }

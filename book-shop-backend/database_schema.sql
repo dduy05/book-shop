@@ -41,6 +41,17 @@ CREATE TABLE IF NOT EXISTS wishlists (
   UNIQUE (user_id, book_id)
 );
 
+-- Create carts table for user shopping carts
+CREATE TABLE IF NOT EXISTS carts (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  book_id INTEGER REFERENCES books(id) ON DELETE CASCADE,
+  quantity INTEGER NOT NULL CHECK (quantity > 0),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (user_id, book_id)
+);
+
 -- Create orders table for order management
 CREATE TABLE IF NOT EXISTS orders (
   id SERIAL PRIMARY KEY,

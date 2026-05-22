@@ -87,18 +87,23 @@ const createOrder = async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    const userId = req.user.id;
-    const { shipping_address, payment_method, cart_items } = req.body;
+      const userId = req.user.id;
+    const { shipping_address, payment_method } = req.body;
 
-    if (!cart_items || cart_items.length === 0) {
+    const cartResult = await client.query(
+      'SELECT book_id AS id, quantity FROM carts WHERE user_id = $1',
+      [userId]
+    );
+
+    if (cartResult.rowCount === 0) {
       return res.status(400).json({ status: 'error', message: 'Giỏ hàng trống' });
     }
 
-    // Tính tổng tiền và kiểm tra tồn kho
+    // Tính tổng tiền và kiểm tra tồn kho đã được reservation khi thêm vào giỏ hàng
     let totalAmount = 0;
     const orderItems = [];
 
-    for (const item of cart_items) {
+    for (const item of cartResult.rows) {
       const bookResult = await client.query(
         'SELECT * FROM books WHERE id = $1',
         [item.id]
@@ -113,14 +118,6 @@ const createOrder = async (req, res) => {
       }
 
       const book = bookResult.rows[0];
-      if (book.quantity < item.quantity) {
-        await client.query('ROLLBACK');
-        return res.status(400).json({
-          status: 'error',
-          message: `Sách "${book.title}" không đủ số lượng trong kho`
-        });
-      }
-
       totalAmount += book.price * item.quantity;
       orderItems.push({
         book_id: item.id,
@@ -146,6 +143,7 @@ const createOrder = async (req, res) => {
       `, [orderId, item.book_id, item.quantity, item.price]);
     }
 
+    await client.query('DELETE FROM carts WHERE user_id = $1', [userId]);
     await client.query('COMMIT');
 
     res.status(201).json({
