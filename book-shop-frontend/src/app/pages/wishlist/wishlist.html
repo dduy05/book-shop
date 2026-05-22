@@ -27,7 +27,7 @@
                   <div class="book-info-table">
                     <div class="book-cover-small">
                       @if (book.image) {
-                        <img [src]="book.image" [alt]="book.title" />
+                        <img [src]="getImageUrl(book.image)" [alt]="book.title" />
                       } @else {
                         <div class="placeholder">📖</div>
                       }
@@ -69,7 +69,7 @@
           <div class="wishlist-card">
             <div class="card-cover">
               @if (book.image) {
-                <img [src]="book.image" [alt]="book.title" />
+                <img [src]="getImageUrl(book.image)" [alt]="book.title" />
               } @else {
                 <div class="placeholder">📖</div>
               }

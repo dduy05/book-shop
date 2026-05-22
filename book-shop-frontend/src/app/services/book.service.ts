@@ -54,6 +54,13 @@ export class BookService {
     return this.http.post<ApiResponse<Book>>(this.apiUrl, book, { headers: this.getHeaders() });
   }
 
+  // ── POST /api/books/import-excel ──
+  importBooksExcel(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any>(`${this.apiUrl}/import-excel`, formData, { headers: this.getHeaders() });
+  }
+
   // ── PUT /api/books/:id ──
   updateBook(id: number, book: Partial<Book> | FormData): Observable<ApiResponse<Book>> {
     return this.http.put<ApiResponse<Book>>(`${this.apiUrl}/${id}`, book, { headers: this.getHeaders() });

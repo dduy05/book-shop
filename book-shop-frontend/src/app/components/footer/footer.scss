@@ -1,0 +1,280 @@
+.footer {
+  background: linear-gradient(180deg, #1e1e2e 0%, #11111b 100%);
+  color: #cdd6f4;
+  padding-top: 60px;
+  border-top: 1px solid rgba(203, 166, 247, 0.15);
+  font-family: inherit;
+  margin-top: 40px;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 40px 24px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr;
+  gap: 48px;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Cột Thương hiệu */
+.footer-logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #cba6f7;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: transform 0.3s ease;
+  display: inline-block;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.brand-desc {
+  color: #a6adc8;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.social-links {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cdd6f4;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    color: #1e1e2e;
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(203, 166, 247, 0.4);
+  }
+
+  &.facebook:hover {
+    background: #1877f2;
+    border-color: #1877f2;
+  }
+
+  &.instagram:hover {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    border-color: transparent;
+    color: #ffffff;
+  }
+
+  &.twitter:hover {
+    background: #1da1f2;
+    border-color: #1da1f2;
+  }
+
+  &.github:hover {
+    background: #24292e;
+    border-color: #24292e;
+    color: #ffffff;
+  }
+}
+
+/* Cột Tiêu đề */
+.col-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #cba6f7;
+  position: relative;
+  padding-bottom: 8px;
+  margin: 0;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 35px;
+    height: 3px;
+    background: #cba6f7;
+    border-radius: 2px;
+  }
+}
+
+/* Cột Links */
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  li a {
+    color: #a6adc8;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+
+    i {
+      font-size: 0.8rem;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover {
+      color: #cba6f7;
+      padding-left: 6px;
+
+      i {
+        transform: translateX(4px);
+      }
+    }
+  }
+}
+
+/* Cột Liên hệ */
+.contact-info {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    color: #a6adc8;
+    font-size: 0.95rem;
+    line-height: 1.5;
+
+    .icon-accent {
+      color: #cba6f7;
+      font-size: 1.1rem;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+
+    span a {
+      color: #cba6f7;
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.2s;
+
+      &:hover {
+        text-decoration: underline;
+        opacity: 0.85;
+      }
+    }
+  }
+}
+
+/* Bottom Footer */
+.footer-bottom {
+  background: #11111b;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 24px 0;
+}
+
+.footer-bottom-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  p {
+    margin: 0;
+    color: #a6adc8;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    strong {
+      color: #cba6f7;
+    }
+
+    .heart-icon {
+      color: #f38ba8;
+      font-size: 0.85rem;
+      animation: beat 1.2s infinite alternate;
+    }
+  }
+}
+
+.footer-policy {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  a {
+    color: #a6adc8;
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #cba6f7;
+    }
+  }
+
+  .divider {
+    color: rgba(255, 255, 255, 0.15);
+    font-size: 0.8rem;
+  }
+}
+
+@keyframes beat {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.2); }
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .footer-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+
+  .brand-col {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .brand-col {
+    grid-column: span 1;
+  }
+
+  .footer-bottom-container {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+}

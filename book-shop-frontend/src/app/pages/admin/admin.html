@@ -27,12 +27,19 @@
          TAB QUẢN LÝ SÁCH
     ══════════════════════════════════════ -->
   <section *ngIf="activeTab === 'books'" class="tab-content">
-        <div class="tab-header">
+        <div class="tab-header" style="display: flex; gap: 12px; align-items: center;">
           <p-button
             label="Thêm sách mới"
             icon="pi pi-plus"
             (onClick)="onAddNew()"
             styleClass="btn-add"
+          />
+          <p-button
+            label="Nhập từ Excel"
+            icon="pi pi-file-excel"
+            severity="success"
+            (onClick)="onOpenImportExcelDialog()"
+            styleClass="btn-add btn-excel-import"
           />
         </div>
 
@@ -75,7 +82,7 @@
                 <td class="col-id">{{ book.id }}</td>
 
                 <td class="col-img">
-                  <img *ngIf="book.image; else noImage" [src]="book.image" [alt]="book.title" class="book-thumb" />
+                  <img *ngIf="book.image; else noImage" [src]="getImageUrl(book.image)" [alt]="book.title" class="book-thumb" />
                   <ng-template #noImage>
                     <div class="no-img">📖</div>
                   </ng-template>
@@ -515,6 +522,105 @@
     <ng-template #footer>
       <div class="dialog-footer">
         <p-button label="Đóng" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="orderDetailDialogVisible = false" />
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- ══════════════════════════════════════
+       MODAL NHẬP SÁCH TỪ EXCEL
+  ══════════════════════════════════════ -->
+  <p-dialog
+    [(visible)]="importExcelDialogVisible"
+    header="Nhập sách từ tệp Excel"
+    [modal]="true"
+    [style]="{ width: '600px' }"
+    [draggable]="false"
+    [resizable]="false"
+  >
+    <div class="excel-import-container">
+      <!-- Hướng dẫn và Tải mẫu -->
+      <div class="import-instructions">
+        <p>Để nhập sách hàng loạt, vui lòng sử dụng tệp Excel mẫu của chúng tôi để điền thông tin chính xác nhất.</p>
+        <button type="button" class="btn-download-template" (click)="onDownloadTemplate()">
+          <i class="pi pi-download"></i> Tải tệp Excel mẫu (.xlsx)
+        </button>
+      </div>
+
+      <!-- Vùng chọn file / kéo thả -->
+      <div class="excel-upload-zone" [class.file-selected]="selectedExcelFile">
+        <label for="excel-file-input" class="upload-label">
+          <div class="upload-icon">
+            <i class="pi pi-file-excel" style="font-size: 3rem; color: #22c55e;"></i>
+          </div>
+          <span class="upload-text" *ngIf="!selectedExcelFile">
+            Kéo thả tệp Excel vào đây hoặc <strong>nhấp để chọn tệp</strong>
+          </span>
+          <span class="upload-text file-name" *ngIf="selectedExcelFile">
+            📄 {{ excelFileName }}
+          </span>
+          <span class="file-size" *ngIf="selectedExcelFile">
+            ({{ (selectedExcelFile.size / 1024) | number:'1.0-1' }} KB)
+          </span>
+        </label>
+        <input
+          id="excel-file-input"
+          type="file"
+          accept=".xlsx, .xls"
+          (change)="onExcelFileChange($event)"
+          style="display: none;"
+        />
+      </div>
+
+      <!-- Trạng thái Loading sinh động -->
+      <div class="import-loading-container" *ngIf="importing">
+        <div class="loader-spinner"></div>
+        <p>Đang tải tệp lên và phân tích dữ liệu sách. Vui lòng không đóng cửa sổ này...</p>
+      </div>
+
+      <!-- Kết quả báo cáo sau khi import xong -->
+      <div class="import-result-container animate-fade-in" *ngIf="importResult && !importing">
+        <h4 class="result-title">📊 Báo cáo kết quả nhập Excel</h4>
+        
+        <div class="result-summary-grid">
+          <div class="summary-card success">
+            <span class="summary-num">{{ importResult.successCount }}</span>
+            <span class="summary-label">Nhập thành công</span>
+          </div>
+          <div class="summary-card error">
+            <span class="summary-num">{{ importResult.errorCount }}</span>
+            <span class="summary-label">Số dòng bị lỗi</span>
+          </div>
+        </div>
+
+        <!-- Bảng liệt kê lỗi chi tiết nếu có -->
+        <div class="error-details-box" *ngIf="importResult.errorCount > 0">
+          <h5 class="error-list-title"><i class="pi pi-exclamation-triangle"></i> Chi tiết các lỗi cần khắc phục:</h5>
+          <div class="error-list-scroll">
+            <table class="error-table">
+              <thead>
+                <tr>
+                  <th style="width: 80px; text-align: center;">Dòng</th>
+                  <th>Nội dung lỗi chi tiết</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let err of importResult.errors">
+                  <td style="text-align: center; font-weight: bold; color: #ef4444;">{{ err.row }}</td>
+                  <td class="error-msg-text">{{ err.message }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="error-tip">💡 **Mẹo:** Bạn hãy sửa các dòng bị lỗi trên trong tệp Excel của mình rồi tải lên lại để nhập tiếp các sách này.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chân dialog -->
+    <ng-template #footer>
+      <div class="dialog-footer">
+        <p-button label="Đóng" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="importExcelDialogVisible = false" [disabled]="importing" />
+        <p-button label="Tải lên và Nhập" icon="pi pi-upload" severity="success" (onClick)="onUploadExcel()" [disabled]="!selectedExcelFile || importing" />
       </div>
     </ng-template>
   </p-dialog>

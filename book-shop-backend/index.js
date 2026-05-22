@@ -1,4 +1,4 @@
-require('dotenv').config(); // Phải load đầu tiên, trước các require khác
+require('dotenv').config(); // Phải load đầu tiên, trước các require khác (Nodemon triggered)
 
 const express = require('express');
 const cors    = require('cors');
@@ -12,6 +12,7 @@ const orderRoutes = require('./src/routes/orderRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const postRoutes = require('./src/routes/postRoutes');
 const chatbotGetBooksRoutes = require('./chatbot/get_books');
+const contactRoutes = require('./src/routes/contactRoutes');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -55,6 +56,9 @@ app.use('/api/users', userRoutes);
 
 // Routes posts (user posts + admin moderation)
 app.use('/api/posts', postRoutes);
+
+// Routes contact
+app.use('/api/contact', contactRoutes);
 
 // Routes chatbot - lấy danh sách sách
 app.use('/chatbot/get_books', chatbotGetBooksRoutes);

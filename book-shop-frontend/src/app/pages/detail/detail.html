@@ -16,7 +16,7 @@
       <div class="book-image-section">
         <div class="book-cover">
           @if (b.image) {
-            <img [src]="b.image" [alt]="b.title" class="book-img">
+            <img [src]="getImageUrl(b.image)" [alt]="b.title" class="book-img">
           } @else {
             <div class="book-placeholder">📖</div>
           }

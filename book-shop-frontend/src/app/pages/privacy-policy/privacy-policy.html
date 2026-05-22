@@ -1,0 +1,113 @@
+<div class="policy-wrapper">
+  <!-- Header Banner -->
+  <div class="policy-header">
+    <div class="header-content">
+      <div class="icon-container">
+        <i class="pi pi-shield shield-icon"></i>
+      </div>
+      <h1>Chính Sách Bảo Mật</h1>
+      <p class="update-time">Cập nhật lần cuối: {{ currentDate }}</p>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="policy-body">
+    <div class="back-nav">
+      <a routerLink="/" class="back-btn">
+        <i class="pi pi-arrow-left"></i> Quay lại Trang chủ
+      </a>
+    </div>
+
+    <div class="policy-card">
+      <p class="intro-text">
+        Chào mừng bạn đến với <strong>BookShop</strong>. Chúng tôi rất coi trọng quyền riêng tư của bạn và cam kết bảo vệ thông tin cá nhân mà bạn chia sẻ. Chính sách bảo mật này giải thích cách chúng tôi thu thập, sử dụng, lưu trữ và bảo vệ dữ liệu của bạn khi bạn sử dụng dịch vụ của cửa hàng.
+      </p>
+
+      <hr class="section-divider">
+
+      <!-- Section 1 -->
+      <section class="policy-section">
+        <div class="section-header">
+          <i class="pi pi-database section-icon"></i>
+          <h2>1. Thu Thập Thông Tin Cá Nhân</h2>
+        </div>
+        <p>Chúng tôi thu thập thông tin trực tiếp từ bạn khi bạn đăng ký tài khoản, đăng nhập hoặc thực hiện giao dịch mua bán trên hệ thống. Các thông tin này bao gồm:</p>
+        <ul>
+          <li><strong>Thông tin cơ bản:</strong> Họ tên, Địa chỉ Email, Số điện thoại và Địa chỉ giao nhận hàng.</li>
+          <li><strong>Mật khẩu tài khoản:</strong> Được bảo mật và mã hóa một chiều qua thuật toán băm bảo mật.</li>
+          <li><strong>Lịch sử hoạt động:</strong> Lịch sử đặt hàng, danh sách yêu thích và các bài đăng chia sẻ sách cũ.</li>
+        </ul>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="policy-section">
+        <div class="section-header">
+          <i class="pi pi-cog section-icon"></i>
+          <h2>2. Cách Thức Sử Dụng Thông Tin</h2>
+        </div>
+        <p>BookShop sử dụng thông tin thu thập được cho các mục đích chính đáng dưới đây:</p>
+        <ul>
+          <li>Xử lý các đơn đặt hàng, vận chuyển sách cũ và xác nhận thanh toán.</li>
+          <li>Gửi thông báo cập nhật về trạng thái đơn hàng (đang chuẩn bị, đang giao, đã giao thành công).</li>
+          <li>Hỗ trợ giải đáp các thắc mắc, phản hồi khiếu nại của khách hàng kịp thời.</li>
+          <li>Cải tiến trải nghiệm giao diện người dùng và đưa ra gợi ý sách cũ phù hợp với sở thích.</li>
+        </ul>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="policy-section">
+        <div class="section-header">
+          <i class="pi pi-lock section-icon"></i>
+          <h2>3. Cơ Chế Bảo Mật & Lưu Trữ Dữ Liệu</h2>
+        </div>
+        <p>Bảo mật thông tin của bạn là ưu tiên hàng đầu của chúng tôi. Chúng tôi áp dụng các công nghệ tiêu chuẩn công nghiệp:</p>
+        <ul>
+          <li><strong>Mã hóa mật khẩu:</strong> Toàn bộ mật khẩu người dùng được mã hóa một chiều an toàn bằng thư viện <code>bcryptjs</code> trước khi ghi nhận vào hệ cơ sở dữ liệu PostgreSQL. Chúng tôi và quản trị viên không thể xem mật khẩu thô của bạn.</li>
+          <li><strong>Xác thực JWT:</strong> Sử dụng <code>JSON Web Token (JWT)</code> để quản lý các phiên đăng nhập, đảm bảo thông tin cá nhân của bạn không bị rò rỉ trong quá trình giao tiếp API.</li>
+          <li><strong>Lưu trữ an toàn:</strong> Dữ liệu được quản lý tập trung và bảo vệ chặt chẽ bởi hệ thống máy chủ và tường lửa tiên tiến.</li>
+        </ul>
+      </section>
+
+      <!-- Section 4 -->
+      <section class="policy-section">
+        <div class="section-header">
+          <i class="pi pi-share-alt section-icon"></i>
+          <h2>4. Chia Sẻ Thông Tin Với Bên Thứ Ba</h2>
+        </div>
+        <p>Chúng tôi cam kết tuyệt đối <strong>KHÔNG</strong> bán, cho thuê, trao đổi hay tiết lộ thông tin cá nhân của bạn cho bất kỳ bên thứ ba nào vì mục đích thương mại riêng của họ. Thông tin của bạn chỉ được chia sẻ trong các trường hợp ngoại lệ sau:</p>
+        <ul>
+          <li>Các đơn vị vận chuyển, bưu điện (để giao nhận sản phẩm sách đến tận tay bạn).</li>
+          <li>Khi có yêu cầu chính thức bằng văn bản từ các cơ quan pháp luật có thẩm quyền theo quy định của pháp luật Việt Nam.</li>
+        </ul>
+      </section>
+
+      <!-- Section 5 -->
+      <section class="policy-section">
+        <div class="section-header">
+          <i class="pi pi-user-edit section-icon"></i>
+          <h2>5. Quyền Lợi Và Lựa Chọn Của Bạn</h2>
+        </div>
+        <p>Bạn có toàn quyền kiểm soát dữ liệu cá nhân của mình trên hệ thống BookShop:</p>
+        <ul>
+          <li>Bạn có thể truy cập, chỉnh sửa thông tin cá nhân và thay đổi mật khẩu tại trang <strong>Tài khoản cá nhân (Profile)</strong> sau khi đăng nhập.</li>
+          <li>Bạn có thể yêu cầu xóa vĩnh viễn tài khoản hoặc tạm dừng nhận các thông tin tiếp thị từ chúng tôi bằng cách liên hệ qua Email hỗ trợ.</li>
+        </ul>
+      </section>
+
+      <!-- Contact Banner inside card -->
+      <div class="contact-banner">
+        <div class="banner-info">
+          <i class="pi pi-envelope mail-icon"></i>
+          <div>
+            <h3>Bạn có câu hỏi hoặc thắc mắc?</h3>
+            <p>Đừng ngần ngại liên hệ với bộ phận hỗ trợ khách hàng của chúng tôi để được giải đáp chi tiết.</p>
+          </div>
+        </div>
+        <button (click)="openContactDialog($event)" class="contact-btn" style="border: none; cursor: pointer;">Gửi Email Liên Hệ</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<app-contact-dialog [(visible)]="isContactDialogOpen"></app-contact-dialog>

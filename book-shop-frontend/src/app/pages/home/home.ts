@@ -110,11 +110,20 @@ export class HomeComponent implements OnInit {
     this.isChatbotDialogOpen.set(false);
   }
 
-  // 
   // Chọn category để filter
   selectCategory(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const categoryId = target.value ? +target.value : null;
     this.selectedCategoryId.set(categoryId);
+  }
+
+  getImageUrl(image: string | null | undefined): string {
+    if (!image) {
+      return '';
+    }
+    if (image.startsWith('http')) {
+      return image;
+    }
+    return image.startsWith('/') ? `http://localhost:3000${image}` : `http://localhost:3000/${image}`;
   }
 }

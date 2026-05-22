@@ -131,4 +131,14 @@ export class DetailComponent implements OnInit {
       });
     }
   }
+
+  getImageUrl(image: string | null | undefined): string {
+    if (!image) {
+      return '';
+    }
+    if (image.startsWith('http')) {
+      return image;
+    }
+    return image.startsWith('/') ? `http://localhost:3000${image}` : `http://localhost:3000/${image}`;
+  }
 }

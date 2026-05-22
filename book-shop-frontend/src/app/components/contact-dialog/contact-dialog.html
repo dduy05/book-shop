@@ -1,0 +1,81 @@
+<p-dialog 
+  header="Gửi Tin Nhắn Liên Hệ" 
+  [(visible)]="visible" 
+  (onHide)="closeDialog()"
+  [modal]="true" 
+  [draggable]="false" 
+  [resizable]="false"
+  styleClass="contact-dialog"
+  [style]="{ width: '500px', 'max-width': '95vw' }">
+  
+  <div class="contact-form">
+    <p class="form-desc">Chúng tôi sẽ tiếp nhận ý kiến đóng góp và gửi email phản hồi trực tiếp đến hòm thư của bạn sớm nhất.</p>
+
+    <!-- Họ và tên -->
+    <div class="form-group">
+      <label for="c-name"><i class="pi pi-user text-primary"></i> Họ và tên <span class="required">*</span></label>
+      <input 
+        id="c-name" 
+        type="text" 
+        [(ngModel)]="name" 
+        placeholder="Nhập họ và tên của bạn" 
+        class="form-control"
+        [disabled]="loading()">
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="c-email"><i class="pi pi-envelope text-primary"></i> Email liên hệ <span class="required">*</span></label>
+      <input 
+        id="c-email" 
+        type="email" 
+        [(ngModel)]="email" 
+        placeholder="username@gmail.com" 
+        class="form-control"
+        [disabled]="loading()">
+    </div>
+
+    <!-- Tiêu đề -->
+    <div class="form-group">
+      <label for="c-subject"><i class="pi pi-bookmark text-primary"></i> Tiêu đề <span class="required">*</span></label>
+      <input 
+        id="c-subject" 
+        type="text" 
+        [(ngModel)]="subject" 
+        placeholder="Nội dung cần hỗ trợ, đóng góp ý kiến..." 
+        class="form-control"
+        [disabled]="loading()">
+    </div>
+
+    <!-- Nội dung tin nhắn -->
+    <div class="form-group">
+      <label for="c-message"><i class="pi pi-pencil text-primary"></i> Nội dung tin nhắn <span class="required">*</span></label>
+      <textarea 
+        id="c-message" 
+        rows="4" 
+        [(ngModel)]="message" 
+        placeholder="Nhập nội dung tin nhắn chi tiết tại đây..." 
+        class="form-control"
+        [disabled]="loading()"></textarea>
+    </div>
+
+    <!-- Buttons -->
+    <div class="form-actions">
+      <button 
+        type="button" 
+        class="btn btn-secondary" 
+        (click)="closeDialog()" 
+        [disabled]="loading()">
+        Hủy bỏ
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-primary" 
+        (click)="submitContact()" 
+        [disabled]="loading()">
+        <span *ngIf="!loading()"><i class="pi pi-send"></i> Gửi Liên Hệ</span>
+        <span *ngIf="loading()"><i class="pi pi-spin pi-spinner"></i> Đang gửi...</span>
+      </button>
+    </div>
+  </div>
+</p-dialog>

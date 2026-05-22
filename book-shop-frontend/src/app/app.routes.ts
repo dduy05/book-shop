@@ -12,6 +12,8 @@ import { CreatePostComponent } from './pages/posts/create-post';
 import { MinePostsComponent } from './pages/posts/mine-posts';
 import { PostsListComponent } from './pages/posts/posts-list';
 import { PostDetailComponent } from './pages/posts/post-detail';
+import { PrivacyPolicyComponent } from './pages/privacy-policy/privacy-policy';
+import { TermsOfServiceComponent } from './pages/terms-of-service/terms-of-service';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
@@ -26,4 +28,6 @@ export const routes: Routes = [
   { path: 'posts/create/:id', component: CreatePostComponent, canActivate: [userGuard] },
   { path: 'posts/mine', component: MinePostsComponent, canActivate: [userGuard] },
   { path: 'posts/:id', component: PostDetailComponent },
+  { path: 'privacy-policy', component: PrivacyPolicyComponent },
+  { path: 'terms-of-service', component: TermsOfServiceComponent },
 ];
