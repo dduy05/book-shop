@@ -9,6 +9,7 @@ const getBestSelling = async (req, res) => {
       FROM books b
       LEFT JOIN order_details od ON b.id = od.book_id
       GROUP BY b.id
+      HAVING COALESCE(SUM(od.quantity), 0) >= 1
       ORDER BY COALESCE(SUM(od.quantity), 0) DESC
       LIMIT $1
     `, [limit]);
@@ -29,7 +30,7 @@ const getMonthlyRevenue = async (req, res) => {
       SELECT to_char(date_trunc('month', o.created_at), 'YYYY-MM') AS month,
              COALESCE(SUM(o.total_amount), 0) AS revenue
       FROM orders o
-      WHERE o.status IN ('CONFIRMED','DELIVERED')
+      WHERE o.status = 'DELIVERED'
       GROUP BY date_trunc('month', o.created_at)
       ORDER BY date_trunc('month', o.created_at) DESC
       LIMIT $1

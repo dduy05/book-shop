@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -20,7 +20,7 @@ import { ChatbotComponent } from '../chatbot/chatbot';
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   private bookService = inject(BookService);
   private statsService = inject(StatsService);
   private categoryService = inject(CategoryService);
@@ -45,14 +45,19 @@ export class HomeComponent implements OnInit {
       error: (err) => console.error('Lỗi khi tải categories:', err)
     });
 
-    // Load best-selling book (top 1)
-    this.statsService.getBestSelling(1).subscribe({ next: (rows) => {
-      if (rows && rows.length > 0) {
-        // map to Book shape (partial)
-        const b = rows[0];
-        this.bestSeller.set({ ...b, sold_count: Number(b.sold_count || 0) });
+    this.statsService.getBestSelling(5).subscribe({
+      next: (rows) => {
+        if (rows) {
+          const books = rows.map((b) => ({ ...b, sold_count: Number(b.sold_count || 0) }));
+          this.bestSellers.set(books);
+          this.currentSlide.set(0);
+          this.startAutoCycle();
+        }
+      },
+      error: (e) => {
+        console.error('Lỗi khi tải sách bán chạy:', e);
       }
-    }, error: (e) => { /* non-fatal */ } });
+    });
   }
 
 
@@ -138,5 +143,49 @@ export class HomeComponent implements OnInit {
     return image.startsWith('/') ? `http://localhost:3000${image}` : `http://localhost:3000/${image}`;
   }
 
-  bestSeller = signal<any | null>(null);
+  bestSellers = signal<any[]>([]);
+  currentSlide = signal(0);
+  private sliderIntervalId: ReturnType<typeof window.setInterval> | null = null;
+
+  startAutoCycle(): void {
+    this.stopAutoCycle();
+    if (this.bestSellers().length <= 1) {
+      return;
+    }
+    this.sliderIntervalId = window.setInterval(() => this.nextSlide(), 5000);
+  }
+
+  stopAutoCycle(): void {
+    if (this.sliderIntervalId !== null) {
+      clearInterval(this.sliderIntervalId);
+      this.sliderIntervalId = null;
+    }
+  }
+
+  nextSlide(): void {
+    const count = this.bestSellers().length;
+    if (!count) {
+      return;
+    }
+    this.currentSlide.set((this.currentSlide() + 1) % count);
+    this.startAutoCycle();
+  }
+
+  prevSlide(): void {
+    const count = this.bestSellers().length;
+    if (!count) {
+      return;
+    }
+    this.currentSlide.set((this.currentSlide() - 1 + count) % count);
+    this.startAutoCycle();
+  }
+
+  goToSlide(index: number): void {
+    this.currentSlide.set(index);
+    this.startAutoCycle();
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoCycle();
+  }
 }

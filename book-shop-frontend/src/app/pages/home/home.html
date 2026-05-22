@@ -30,32 +30,44 @@
 
 
 
-  <div *ngIf="bestSeller()" class="section-title">
+  <div *ngIf="bestSellers().length > 0" class="section-title">
     <i class="pi pi-star"></i>
     <h2>Sách bán chạy</h2>
   </div>
 
-  <div *ngIf="bestSeller()" class="best-seller-card">
-    <div class="best-seller-inner">
-      <div class="cover">
-        <div class="ribbon">Bán chạy</div>
-        @if (bestSeller().image) {
-          <img [src]="getImageUrl(bestSeller().image)" [alt]="bestSeller().title" />
-        } @else {
-          <div class="placeholder">📖</div>
+  <div *ngIf="bestSellers().length > 0" class="best-seller-slider">
+    <button type="button" class="slider-nav prev" (click)="prevSlide()">‹</button>
+    <div class="slider-track-wrapper">
+      <div class="slider-track" [style.transform]="'translateX(-' + currentSlide() * 100 + '%)'">
+        @for (book of bestSellers(); track book.id) {
+          <div class="slide">
+            <div class="best-seller-card">
+              <div class="best-seller-inner">
+                <div class="cover">
+                  <div class="ribbon">Bán chạy</div>
+                  @if (book.image) {
+                    <img [src]="getImageUrl(book.image)" [alt]="book.title" />
+                  } @else {
+                    <div class="placeholder">📖</div>
+                  }
+                </div>
+                <div class="info">
+                  <h3>{{ book.title }}</h3>
+                  <p class="author">{{ book.author }}</p>
+                  <p class="price">{{ book.price | currency:'VND':'symbol':'1.0-0' }}</p>
+                  <p class="sold-count">Đã bán: {{ book.sold_count }}</p>
+                  <div class="actions">
+                    <button class="btn-detail" [routerLink]="['/detail', book.id]">Xem chi tiết</button>
+                    <button class="btn-cart" (click)="onAddToCart(book)">🛒 Thêm vào giỏ</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         }
       </div>
-      <div class="info">
-        <h3>{{ bestSeller().title }}</h3>
-        <p class="author">{{ bestSeller().author }}</p>
-        <p class="price">{{ bestSeller().price | currency:'VND':'symbol':'1.0-0' }}</p>
-        <p class="sold-count">Đã bán: {{ bestSeller().sold_count }}</p>
-        <div class="actions">
-          <button class="btn-detail" [routerLink]="['/detail', bestSeller().id]">Xem chi tiết</button>
-          <button class="btn-cart" (click)="onAddToCart(bestSeller())">🛒 Thêm vào giỏ</button>
-        </div>
-      </div>
     </div>
+    <button type="button" class="slider-nav next" (click)="nextSlide()">›</button>
   </div>
 
   <div class="section-title">
