@@ -7,3 +7,4 @@ dist/
 book-shop-backend/node_modules/
 book-shop-frontend/node_modules/
 book-shop-backend/public/uploads/
+book-shop-backend/public/images/

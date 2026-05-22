@@ -20,6 +20,7 @@
     <button type="button" class="tab-button" [class.active]="activeTab==='books'" (click)="setActiveTab('books')">📚 Quản lý sách</button>
     <button type="button" class="tab-button" [class.active]="activeTab==='users'" (click)="setActiveTab('users')">👥 Quản lý người dùng</button>
     <button type="button" class="tab-button" [class.active]="activeTab==='orders'" (click)="setActiveTab('orders')">📦 Quản lý đơn hàng</button>
+    <button type="button" class="tab-button" [class.active]="activeTab==='stats'" (click)="setActiveTab('stats')">📈 Thống kê</button>
     <button type="button" class="tab-button" [class.active]="activeTab==='coupons'" (click)="setActiveTab('coupons')">🏷️ Quản lý mã giảm giá</button>
     <button type="button" class="tab-button" [class.active]="activeTab==='posts'" (click)="setActiveTab('posts')">📝 Quản lý bài viết</button>
   </div>
@@ -203,6 +204,44 @@
           </p-table>
         </div>
     </section>
+
+    <!-- ══════════════════════════════════════
+         TAB THỐNG KÊ (DOANH THU)
+    ══════════════════════════════════════ -->
+    <section *ngIf="activeTab === 'stats'" class="tab-content">
+      <div class="admin-header">
+        <div class="admin-header-left">
+          <div class="admin-icon">📈</div>
+          <div>
+            <h1 class="admin-title">Thống kê</h1>
+            <p class="admin-subtitle">Doanh thu theo tháng (12 tháng gần nhất)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <p-table [value]="monthlyRevenue()" [paginator]="false" [rows]="12" [tableStyle]="{ 'min-width': '40rem' }">
+          <ng-template #header>
+            <tr>
+              <th>Tháng</th>
+              <th style="text-align:right">Doanh thu (VND)</th>
+            </tr>
+          </ng-template>
+          <ng-template #body let-row>
+            <tr>
+              <td>{{ row.month }}</td>
+              <td style="text-align:right">{{ row.revenue | currency:'VND':'symbol':'1.0-0' }}</td>
+            </tr>
+          </ng-template>
+          <ng-template #emptymessage>
+            <tr>
+              <td colspan="2">Chưa có dữ liệu doanh thu.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </section>
+
 
     <!-- ══════════════════════════════════════
          TAB QUẢN LÝ MÃ GIẢM GIÁ

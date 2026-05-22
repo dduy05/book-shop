@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
 import { BookService } from '../../services/book.service';
+import { StatsService } from '../../services/stats.service';
 import { CategoryService, Category } from '../../services/category.service';
 import { CartService } from '../../services/cart.service';
 import { AuthService } from '../../services/auth.service';
@@ -21,6 +22,7 @@ import { ChatbotComponent } from '../chatbot/chatbot';
 })
 export class HomeComponent implements OnInit {
   private bookService = inject(BookService);
+  private statsService = inject(StatsService);
   private categoryService = inject(CategoryService);
   protected cartService = inject(CartService);
   protected authService = inject(AuthService);
@@ -42,6 +44,15 @@ export class HomeComponent implements OnInit {
       next: (data: Category[]) => this.categories.set(data),
       error: (err) => console.error('Lỗi khi tải categories:', err)
     });
+
+    // Load best-selling book (top 1)
+    this.statsService.getBestSelling(1).subscribe({ next: (rows) => {
+      if (rows && rows.length > 0) {
+        // map to Book shape (partial)
+        const b = rows[0];
+        this.bestSeller.set({ ...b, sold_count: Number(b.sold_count || 0) });
+      }
+    }, error: (e) => { /* non-fatal */ } });
   }
 
 
@@ -126,4 +137,6 @@ export class HomeComponent implements OnInit {
     }
     return image.startsWith('/') ? `http://localhost:3000${image}` : `http://localhost:3000/${image}`;
   }
+
+  bestSeller = signal<any | null>(null);
 }

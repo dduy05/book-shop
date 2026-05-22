@@ -18,6 +18,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 // PrimeNG Services
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { PostService } from '../../services/post.service';
+import { StatsService } from '../../services/stats.service';
 import { CouponService, Coupon } from '../../services/coupon.service';
 
 // App
@@ -60,6 +61,7 @@ export class AdminComponent implements OnInit {
   private messageService = inject(MessageService);
   private postService = inject(PostService);
   private router = inject(Router);
+  private statsService = inject(StatsService);
 
   books = signal<Book[]>([]);
   categories = signal<Category[]>([]);
@@ -67,8 +69,9 @@ export class AdminComponent implements OnInit {
   orders = signal<Order[]>([]);
   coupons = signal<Coupon[]>([]);
   loading = signal(true);
-  // Thêm tab 'posts' để quản lý bài viết
-  activeTab: 'books' | 'users' | 'orders' | 'posts' | 'coupons' = 'books';
+  monthlyRevenue = signal<any[]>([]);
+  // Thêm tab 'posts' và 'stats' để quản lý bài viết và thống kê
+  activeTab: 'books' | 'users' | 'orders' | 'posts' | 'coupons' | 'stats' = 'books';
 
   // Posts management
   posts = signal<any[]>([]);
@@ -78,7 +81,7 @@ export class AdminComponent implements OnInit {
   postDetailDialogVisible = false;
   selectedPost: any = null;
 
-  setActiveTab(tab: 'books' | 'users' | 'orders' | 'posts' | 'coupons'): void {
+  setActiveTab(tab: 'books' | 'users' | 'orders' | 'posts' | 'coupons' | 'stats'): void {
     this.activeTab = tab;
   }
 
@@ -158,6 +161,7 @@ export class AdminComponent implements OnInit {
     this.loadOrders();
     this.loadCoupons();
     this.loadPosts();
+    this.loadMonthlyRevenue();
   }
 
   // ── Posts ──
@@ -261,6 +265,15 @@ export class AdminComponent implements OnInit {
     this.couponService.getAllCoupons().subscribe({
       next: (data) => this.coupons.set(data),
       error: (err) => console.error('Lỗi khi tải coupons:', err)
+    });
+  }
+
+  loadMonthlyRevenue(months = 12): void {
+    this.statsService.getMonthlyRevenue(months).subscribe({
+      next: (data) => {
+        this.monthlyRevenue.set(data.map((r: any) => ({ month: r.month, revenue: Number(r.revenue) })));
+      },
+      error: (err) => console.error('Lỗi tải doanh thu theo tháng:', err)
     });
   }
 

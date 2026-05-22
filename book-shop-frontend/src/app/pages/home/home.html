@@ -30,6 +30,34 @@
 
 
 
+  <div *ngIf="bestSeller()" class="section-title">
+    <i class="pi pi-star"></i>
+    <h2>Sách bán chạy</h2>
+  </div>
+
+  <div *ngIf="bestSeller()" class="best-seller-card">
+    <div class="best-seller-inner">
+      <div class="cover">
+        <div class="ribbon">Bán chạy</div>
+        @if (bestSeller().image) {
+          <img [src]="getImageUrl(bestSeller().image)" [alt]="bestSeller().title" />
+        } @else {
+          <div class="placeholder">📖</div>
+        }
+      </div>
+      <div class="info">
+        <h3>{{ bestSeller().title }}</h3>
+        <p class="author">{{ bestSeller().author }}</p>
+        <p class="price">{{ bestSeller().price | currency:'VND':'symbol':'1.0-0' }}</p>
+        <p class="sold-count">Đã bán: {{ bestSeller().sold_count }}</p>
+        <div class="actions">
+          <button class="btn-detail" [routerLink]="['/detail', bestSeller().id]">Xem chi tiết</button>
+          <button class="btn-cart" (click)="onAddToCart(bestSeller())">🛒 Thêm vào giỏ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="section-title">
     <i class="pi pi-book"></i>
     <h2>Tất cả sách</h2>

@@ -12,6 +12,7 @@ const orderRoutes = require('./src/routes/orderRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const postRoutes = require('./src/routes/postRoutes');
 const couponRoutes = require('./src/routes/couponRoutes');
+const statsRoutes = require('./src/routes/statsRoutes');
 const chatbotGetBooksRoutes = require('./chatbot/get_books');
 const contactRoutes = require('./src/routes/contactRoutes');
 const chatbotGetCouponsRoutes = require('./chatbot/get_coupons');
@@ -61,6 +62,9 @@ app.use('/api/users', userRoutes);
 
 // Routes posts (user posts + admin moderation)
 app.use('/api/posts', postRoutes);
+
+// Routes stats (best-seller, revenue)
+app.use('/api/stats', statsRoutes);
 
 // Routes contact
 app.use('/api/contact', contactRoutes);
