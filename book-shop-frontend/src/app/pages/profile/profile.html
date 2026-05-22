@@ -116,7 +116,7 @@
                   <div class="order-item-row">
                     <div class="item-info">
                       @if (item.book_image) {
-                        <img [src]="item.book_image" [alt]="item.book_title" class="item-image">
+                        <img [src]="getImageUrl(item.book_image)" [alt]="item.book_title" class="item-image">
                       } @else {
                         <div class="item-placeholder">📖</div>
                       }

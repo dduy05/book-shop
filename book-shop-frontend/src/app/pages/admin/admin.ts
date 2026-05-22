@@ -96,6 +96,13 @@ export class AdminComponent implements OnInit {
   orderDetailDialogVisible = false;
   selectedOrder: Order | null = null;
 
+  // Excel Import state
+  importExcelDialogVisible = false;
+  selectedExcelFile: File | null = null;
+  excelFileName = '';
+  importing = false;
+  importResult: any = null;
+
   // Reactive Form
   bookForm: FormGroup = this.fb.group({
     title:       ['', [Validators.required, Validators.minLength(2)]],
@@ -201,7 +208,10 @@ export class AdminComponent implements OnInit {
     if (!image) {
       return '';
     }
-    return image.startsWith('http') ? image : `http://localhost:3000${image}`;
+    if (image.startsWith('http')) {
+      return image;
+    }
+    return image.startsWith('/') ? `http://localhost:3000${image}` : `http://localhost:3000/${image}`;
   }
 
   getStatusSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' {
@@ -433,6 +443,75 @@ export class AdminComponent implements OnInit {
     this.dialogVisible = false;
     this.selectedBookImageFile = null;
     this.bookImagePreview = null;
+  }
+
+  // ── Excel Import Methods ──
+  onOpenImportExcelDialog(): void {
+    this.selectedExcelFile = null;
+    this.excelFileName = '';
+    this.importResult = null;
+    this.importExcelDialogVisible = true;
+  }
+
+  onExcelFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      this.selectedExcelFile = null;
+      this.excelFileName = '';
+      return;
+    }
+    this.selectedExcelFile = input.files[0];
+    this.excelFileName = this.selectedExcelFile.name;
+    this.importResult = null;
+  }
+
+  onUploadExcel(): void {
+    if (!this.selectedExcelFile) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Chưa chọn tệp',
+        detail: 'Vui lòng chọn một tệp Excel (.xlsx hoặc .xls) trước.'
+      });
+      return;
+    }
+
+    this.importing = true;
+    this.importResult = null;
+
+    this.bookService.importBooksExcel(this.selectedExcelFile).subscribe({
+      next: (res) => {
+        this.importing = false;
+        this.importResult = res.data;
+        
+        if (res.data.successCount > 0) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Thành công',
+            detail: `Đã nhập thành công ${res.data.successCount} sách từ Excel!`
+          });
+          this.loadBooks();
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Thất bại',
+            detail: 'Không có sách nào được nhập thành công. Vui lòng kiểm tra lỗi chi tiết.'
+          });
+        }
+      },
+      error: (err) => {
+        this.importing = false;
+        console.error('Lỗi khi tải tệp Excel lên:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Lỗi hệ thống',
+          detail: err.error?.message || 'Không thể tải tệp Excel lên xử lý.'
+        });
+      }
+    });
+  }
+
+  onDownloadTemplate(): void {
+    window.open('http://localhost:3000/templates/book_import_template.xlsx', '_blank');
   }
 
   onBookImageChange(event: Event): void {

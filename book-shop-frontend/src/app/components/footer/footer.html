@@ -1,0 +1,75 @@
+<footer class="footer">
+  <div class="footer-container">
+    <!-- Cột 1: Giới thiệu thương hiệu -->
+    <div class="footer-col brand-col">
+      <a routerLink="/" class="footer-logo">📚 BookShop</a>
+      <p class="brand-desc">
+        Nơi hội tụ những trang sách cũ mang hơi thở của thời gian. Chúng tôi mang đến những cuốn sách chất lượng, lưu
+        trữ tri thức và chia sẻ đam mê đọc sách với mọi người.
+      </p>
+      <div class="social-links">
+        <a href="https://facebook.com" target="_blank" class="social-btn facebook" aria-label="Facebook">
+          <i class="pi pi-facebook"></i>
+        </a>
+        <a href="https://instagram.com" target="_blank" class="social-btn instagram" aria-label="Instagram">
+          <i class="pi pi-instagram"></i>
+        </a>
+        <a href="https://twitter.com" target="_blank" class="social-btn twitter" aria-label="Twitter">
+          <i class="pi pi-twitter"></i>
+        </a>
+        <a href="https://github.com" target="_blank" class="social-btn github" aria-label="GitHub">
+          <i class="pi pi-github"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Cột 2: Đường dẫn nhanh -->
+    <div class="footer-col links-col">
+      <h3 class="col-title">Khám Phá</h3>
+      <ul class="footer-links">
+        <li><a routerLink="/"><i class="pi pi-angle-right"></i> Trang Chủ</a></li>
+        <li><a routerLink="/posts"><i class="pi pi-angle-right"></i> Bài Viết & Blog</a></li>
+        <li><a routerLink="/cart"><i class="pi pi-angle-right"></i> Giỏ Hàng của Bạn</a></li>
+        <li><a routerLink="/profile"><i class="pi pi-angle-right"></i> Tài Khoản cá nhân</a></li>
+      </ul>
+    </div>
+
+    <!-- Cột 3: Thông tin liên hệ -->
+    <div class="footer-col contact-col">
+      <h3 class="col-title">Thông Tin Liên Hệ</h3>
+      <ul class="contact-info">
+        <li>
+          <i class="pi pi-map-marker icon-accent"></i>
+          <span>123 Đường Sách Nguyễn Văn Bình, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh</span>
+        </li>
+        <li>
+          <i class="pi pi-phone icon-accent"></i>
+          <span>Hotline: 1900 1234 (8:00 - 21:00)</span>
+        </li>
+        <li>
+          <i class="pi pi-envelope icon-accent"></i>
+          <span>Email: <a href="#" (click)="openContactDialog($event)" style="color: #cba6f7; text-decoration: none; font-weight: 600; cursor: pointer;">lienhe@bookshop.com</a></span>
+        </li>
+        <li>
+          <i class="pi pi-clock icon-accent"></i>
+          <span>Mở cửa: Thứ 2 - Chủ Nhật / 8:00 AM - 9:30 PM</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Dòng bản quyền dưới cùng -->
+  <div class="footer-bottom">
+    <div class="footer-bottom-container">
+      <p>&copy; {{ currentYear }} <strong>BookShop</strong>. Thiết kế với <i class="pi pi-heart-fill heart-icon"></i>
+        dành cho những người yêu sách.</p>
+      <div class="footer-policy">
+        <a routerLink="/privacy-policy">Chính sách bảo mật</a>
+        <span class="divider">|</span>
+        <a routerLink="/terms-of-service">Điều khoản sử dụng</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<app-contact-dialog [(visible)]="isContactDialogOpen"></app-contact-dialog>

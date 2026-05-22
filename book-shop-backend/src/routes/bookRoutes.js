@@ -9,6 +9,7 @@ const {
   updateBook,
   updateBookQuantity,
   deleteBook,
+  importBooksFromExcel,
 } = require('../controllers/bookController');
 const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 
@@ -27,6 +28,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+const excelUpload = multer({ storage: multer.memoryStorage() });
 
 const router = Router();
 
@@ -35,6 +37,8 @@ router.get('/', getAllBooks);
 router.get('/:id', getBookById);
 
 router.post('/', verifyToken, isAdmin, upload.single('image'), createBook);
+
+router.post('/import-excel', verifyToken, isAdmin, excelUpload.single('file'), importBooksFromExcel);
 
 router.put('/:id', verifyToken, isAdmin, upload.single('image'), updateBook);
 

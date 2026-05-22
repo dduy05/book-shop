@@ -20,7 +20,7 @@
           <div class="cart-item">
             <div class="item-cover">
               @if (item.image) {
-                <img [src]="item.image" [alt]="item.title" />
+                <img [src]="getImageUrl(item.image)" [alt]="item.title" />
               } @else {
                 <div class="item-placeholder">📖</div>
               }

@@ -16,7 +16,27 @@ pool.connect((err, client, release) => {
     console.error('❌ Kết nối PostgreSQL thất bại:', err.message);
     return;
   }
-  release(); 
+  
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS contact_messages (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      subject VARCHAR(255) NOT NULL,
+      message TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+  
+  client.query(createTableQuery, (queryErr) => {
+    release();
+    if (queryErr) {
+      console.error('❌ Lỗi khi khởi tạo bảng contact_messages:', queryErr.message);
+    } else {
+      console.log('✅ Bảng contact_messages đã sẵn sàng');
+    }
+  });
+  
   console.log('✅ Đã kết nối thành công với PostgreSQL');
 });
 
