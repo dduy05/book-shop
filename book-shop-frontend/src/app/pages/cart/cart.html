@@ -85,6 +85,15 @@
       <div class="order-total">
         <strong>Tổng cộng: {{ cartService.totalPrice() | currency:'VND':'symbol':'1.0-0' }}</strong>
       </div>
+      <div *ngIf="appliedCoupons().length > 0" class="discount-summary">
+        <div class="discount-row">
+          <span>Tổng giảm:</span>
+          <span>{{ getDiscountAmount() | currency:'VND':'symbol':'1.0-0' }}</span>
+        </div>
+        <div class="discount-total">
+          <strong>Thanh toán còn: {{ getFinalTotal() | currency:'VND':'symbol':'1.0-0' }}</strong>
+        </div>
+      </div>
     </div>
 
     <form [formGroup]="checkoutForm" (ngSubmit)="submitOrder()" class="checkout-form">
@@ -106,6 +115,26 @@
           <option value="COD">Thanh toán khi nhận hàng (COD)</option>
           <option value="Bank Transfer">Chuyển khoản ngân hàng</option>
         </select>
+      </div>
+
+      <div class="form-group coupon-group">
+        <label for="coupon_code">Mã giảm giá</label>
+        <div class="coupon-row">
+          <input id="coupon_code" formControlName="coupon_code" placeholder="Nhập mã giảm giá" />
+          <button type="button" class="btn-apply" (click)="applyCoupon()">Áp dụng</button>
+        </div>
+      </div>
+
+      <div *ngIf="appliedCoupons().length > 0" class="applied-coupons">
+        <h4>Đã áp dụng</h4>
+        <ul>
+          @for (coupon of appliedCoupons(); track coupon.code) {
+            <li>
+              <span>{{ coupon.code }} — Giảm {{ coupon.applicable_discount | currency:'VND':'symbol':'1.0-0' }}</span>
+              <button type="button" class="btn-remove-code" (click)="removeAppliedCoupon(coupon.code)">x</button>
+            </li>
+          }
+        </ul>
       </div>
     </form>
   </div>

@@ -11,6 +11,7 @@ const cartRoutes = require('./src/routes/cartRoutes');
 const orderRoutes = require('./src/routes/orderRoutes');
 const userRoutes = require('./src/routes/userRoutes');
 const postRoutes = require('./src/routes/postRoutes');
+const couponRoutes = require('./src/routes/couponRoutes');
 const chatbotGetBooksRoutes = require('./chatbot/get_books');
 
 const app  = express();
@@ -49,6 +50,9 @@ app.use('/api/cart', cartRoutes);
 
 // Routes orders
 app.use('/api/orders', orderRoutes);
+
+// Routes coupons
+app.use('/api/coupons', couponRoutes);
 
 // Routes users
 app.use('/api/users', userRoutes);

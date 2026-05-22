@@ -56,6 +56,8 @@ CREATE TABLE IF NOT EXISTS carts (
 CREATE TABLE IF NOT EXISTS orders (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  original_amount INTEGER NOT NULL,
+  discount_amount INTEGER NOT NULL DEFAULT 0,
   total_amount INTEGER NOT NULL,
   status VARCHAR(50) DEFAULT 'pending', -- pending, confirmed, shipped, delivered, cancelled
   shipping_address TEXT,
@@ -72,6 +74,29 @@ CREATE TABLE IF NOT EXISTS order_details (
   quantity INTEGER NOT NULL,
   price INTEGER NOT NULL, -- price at the time of order
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create coupons table for discount codes
+CREATE TABLE IF NOT EXISTS coupons (
+  id SERIAL PRIMARY KEY,
+  code VARCHAR(100) NOT NULL UNIQUE,
+  discount_amount INTEGER NOT NULL CHECK (discount_amount >= 0),
+  remaining_quantity INTEGER NOT NULL CHECK (remaining_quantity >= 0),
+  min_order_amount INTEGER NOT NULL DEFAULT 0 CHECK (min_order_amount >= 0),
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create order_coupons table to track coupon use per order
+CREATE TABLE IF NOT EXISTS order_coupons (
+  id SERIAL PRIMARY KEY,
+  order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+  coupon_id INTEGER REFERENCES coupons(id) ON DELETE CASCADE,
+  code VARCHAR(100) NOT NULL,
+  discount_amount INTEGER NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (order_id, coupon_id)
 );
 
 -- Insert sample categories
@@ -99,18 +124,14 @@ INSERT INTO books (title, author, category_id, price, quantity, description) VAL
 ('The Bourne Identity', 'Robert Ludlum', 5, 130000, 12, 'Một cuốn sách hành động về điệp viên')
 ON CONFLICT DO NOTHING;
 
--- Insert sample orders
-INSERT INTO orders (user_id, total_amount, status, shipping_address, payment_method) VALUES
-(2, 270000, 'confirmed', '123 Đường ABC, Quận 1, TP.HCM', 'COD'),
-(2, 150000, 'pending', '456 Đường XYZ, Quận 2, TP.HCM', 'Bank Transfer')
-ON CONFLICT DO NOTHING;
 
--- Insert sample order details
-INSERT INTO order_details (order_id, book_id, quantity, price) VALUES
-(1, 1, 1, 150000), -- Dune in order 1
-(1, 2, 1, 120000), -- The Shining in order 1
-(2, 1, 1, 150000)  -- Dune in order 2
-ON CONFLICT DO NOTHING;
+
+-- Sample coupons
+INSERT INTO coupons (code, discount_amount, remaining_quantity, min_order_amount, description) VALUES
+('SUMMER10', 100000, 5, 200000, 'Giảm 100.000 VND cho đơn hàng từ 200k'),
+('WELCOME50', 50000, 10, 100000, 'Giảm 50.000 VND cho đơn hàng đầu tiên'),
+('FREESHIP', 30000, 20, 150000, 'Giảm giá đơn hàng 30.000 VND')
+ON CONFLICT (code) DO NOTHING;
 
 -- Create posts table for user blog-like posts
 CREATE TABLE IF NOT EXISTS posts (
